@@ -1,4 +1,4 @@
-import { FULL, NOT_SATISFIED, type Parser, type ParserState } from '../parser'
+import type { Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
 
@@ -29,18 +29,14 @@ export function isKeywordValue<Value extends string>(
 class Keyword<Value extends string> implements Parser<KeywordValue<Value>> {
   readonly keyword: string
 
-  readonly domain: ReadonlySet<string>
-
   #value: KeywordValue<Value> | null = null
-
-  get state(): ParserState {
-    return this.#value === null ? NOT_SATISFIED : FULL
-  }
 
   constructor(keyword: Value) {
     this.keyword = keyword
+  }
 
-    this.domain = new Set([this.keyword])
+  get isSatisfied(): boolean {
+    return this.#value !== null
   }
 
   feed(token: Token): boolean {
@@ -48,7 +44,6 @@ class Keyword<Value extends string> implements Parser<KeywordValue<Value>> {
       this.#value = keywordValue(token.value as Value)
       return true
     }
-
     return false
   }
 
@@ -60,7 +55,7 @@ class Keyword<Value extends string> implements Parser<KeywordValue<Value>> {
     return this.#value
   }
 
-  reset() {
+  reset(): void {
     this.#value = null
   }
 

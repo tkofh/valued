@@ -1,5 +1,5 @@
 import Color from 'colorjs.io'
-import { FULL, NOT_SATISFIED, type Parser, type ParserState } from '../parser'
+import type { Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
 
@@ -28,28 +28,29 @@ export function isColorValue(value: unknown): value is ColorValue {
 }
 
 class ColorParser implements Parser<ColorValue> {
-  readonly domain = new Set(['<color>'])
+  static #shape = [new Set('<color>')] as const
 
   #value: ColorValue | null = null
 
-  get state(): ParserState {
-    return this.#value === null ? NOT_SATISFIED : FULL
+  // get isFull(): boolean {
+  //   return this.#value !== null
+  // }
+
+  get isSatisfied(): boolean {
+    return this.#value !== null
   }
 
   feed(token: Token): boolean {
-    if (token.type !== 'literal') {
-      return false
+    if (token.type === 'literal') {
+      const value = colorValue(token.value)
+
+      if (value !== false) {
+        this.#value = value
+        return true
+      }
     }
 
-    const value = colorValue(token.value)
-
-    if (value === false) {
-      return false
-    }
-
-    this.#value = value
-
-    return true
+    return false
   }
 
   flush(): ColorValue | undefined {

@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import { allOf } from '../src/combinator/allOf'
 import { juxtapose } from '../src/combinator/juxtapose'
 import { oneOf } from '../src/combinator/oneOf'
 import { someOf } from '../src/combinator/someOf'
@@ -29,14 +30,6 @@ describe('oneOf', () => {
       expect(parse(input, parser)).toEqual(output)
     })
   }
-
-  test('throws an error when ambiguity is provided', () => {
-    expect(() => oneOf([keyword('foo'), keyword('foo')])).toThrow()
-  })
-
-  test('throws an error when no parsers are provided', () => {
-    expect(() => oneOf([])).toThrow()
-  })
 })
 
 describe('someOf', () => {
@@ -71,10 +64,37 @@ describe('someOf', () => {
   test('throws an error when no parsers are provided', () => {
     expect(() => someOf([])).toThrow()
   })
+})
 
-  test('throws an error when ambiguity is provided', () => {
-    expect(() => someOf([keyword('foo'), keyword('foo')])).toThrow()
-  })
+describe('allOf', () => {
+  const cases = [
+    [
+      allOf([keyword('foo'), keyword('bar')]),
+      'foo bar',
+      valid([keywordValue('foo'), keywordValue('bar')]),
+    ],
+    [
+      allOf([keyword('foo'), keyword('bar')]),
+      'bar foo',
+      valid([keywordValue('foo'), keywordValue('bar')]),
+    ],
+    [allOf([keyword('foo'), keyword('bar')]), 'foo', invalid()],
+    [allOf([keyword('foo'), keyword('bar')]), 'bar', invalid()],
+    [allOf([keyword('foo'), keyword('bar')]), 'foo bar foo', invalid()],
+    [
+      allOf([dimension(['px']), keyword('bar')]),
+      '10px bar',
+      valid([dimensionValue(10, 'px'), keywordValue('bar')]),
+    ],
+  ] as const
+
+  for (const [parser, input, output] of cases) {
+    test(`treats \`${input}\` as ${
+      output.valid ? 'valid' : 'invalid'
+    } for \`${parser.toString()}\``, () => {
+      expect(parse(input, parser)).toEqual(output)
+    })
+  }
 })
 
 describe('juxtapose', () => {
@@ -162,6 +182,42 @@ describe('combinations', () => {
     expect(parse('foo bar', parser)).toEqual(invalid())
   })
 
+  test('oneOf and allOf', () => {
+    const parser = oneOf([
+      allOf([keyword('foo'), keyword('bar')]),
+      keyword('baz'),
+    ])
+
+    expect(parse('foo', parser)).toEqual(invalid())
+    expect(parse('bar', parser)).toEqual(invalid())
+    expect(parse('baz', parser)).toEqual(valid(keywordValue('baz')))
+    expect(parse('foo bar', parser)).toEqual(
+      valid([keywordValue('foo'), keywordValue('bar')]),
+    )
+    expect(parse('foo bar baz', parser)).toEqual(invalid())
+  })
+
+  test('allOf and oneOf', () => {
+    const parser = allOf([
+      oneOf([keyword('foo'), keyword('bar')]),
+      keyword('baz'),
+    ])
+
+    expect(parse('foo baz', parser)).toEqual(
+      valid([keywordValue('foo'), keywordValue('baz')]),
+    )
+
+    expect(parse('bar baz', parser)).toEqual(
+      valid([keywordValue('bar'), keywordValue('baz')]),
+    )
+
+    expect(parse('baz foo', parser)).toEqual(
+      valid([keywordValue('foo'), keywordValue('baz')]),
+    )
+    expect(parse('baz', parser)).toEqual(invalid())
+    expect(parse('foo', parser)).toEqual(invalid())
+  })
+
   test('someOf and juxtapose', () => {
     const parser = someOf([
       juxtapose([keyword('foo'), keyword('bar')]),
@@ -195,6 +251,72 @@ describe('combinations', () => {
     )
   })
 
+  test('someOf and allOf', () => {
+    const parser = someOf([
+      allOf([keyword('foo'), keyword('bar')]),
+      keyword('baz'),
+    ])
+
+    expect(parse('foo bar', parser)).toEqual(
+      valid([[keywordValue('foo'), keywordValue('bar')], null]),
+    )
+
+    expect(parse('baz', parser)).toEqual(valid([null, keywordValue('baz')]))
+  })
+
+  test('allOf and someOf', () => {
+    const parser = allOf([
+      someOf([keyword('foo'), keyword('bar')]),
+      keyword('baz'),
+    ])
+
+    expect(parse('foo baz', parser)).toEqual(
+      valid([[keywordValue('foo'), null], keywordValue('baz')]),
+    )
+
+    expect(parse('bar baz', parser)).toEqual(
+      valid([[null, keywordValue('bar')], keywordValue('baz')]),
+    )
+
+    expect(parse('baz foo', parser)).toEqual(
+      valid([[keywordValue('foo'), null], keywordValue('baz')]),
+    )
+    expect(parse('baz', parser)).toEqual(invalid())
+    expect(parse('foo', parser)).toEqual(invalid())
+  })
+
+  test('allOf and juxtapose', () => {
+    const parser = allOf([
+      juxtapose([keyword('foo'), keyword('bar')]),
+      keyword('baz'),
+    ])
+
+    expect(parse('foo bar baz', parser)).toEqual(
+      valid([[keywordValue('foo'), keywordValue('bar')], keywordValue('baz')]),
+    )
+
+    expect(parse('foo baz', parser)).toEqual(invalid())
+    expect(parse('bar baz', parser)).toEqual(invalid())
+    expect(parse('bar foo baz', parser)).toEqual(invalid())
+  })
+
+  test('juxtapose and allOf', () => {
+    const parser = juxtapose([
+      allOf([keyword('foo'), keyword('bar')]),
+      keyword('baz'),
+    ])
+
+    expect(parse('foo bar baz', parser)).toEqual(
+      valid([[keywordValue('foo'), keywordValue('bar')], keywordValue('baz')]),
+    )
+
+    expect(parse('foo baz', parser)).toEqual(invalid())
+    expect(parse('bar baz', parser)).toEqual(invalid())
+    expect(parse('bar foo baz', parser)).toEqual(
+      valid([[keywordValue('foo'), keywordValue('bar')], keywordValue('baz')]),
+    )
+  })
+
   test('nested oneOf', () => {
     const parser = oneOf([
       oneOf([keyword('foo'), keyword('bar')]),
@@ -224,6 +346,17 @@ describe('combinations', () => {
   test('nested juxtapose', () => {
     const parser = juxtapose([
       juxtapose([keyword('foo'), keyword('bar')]),
+      keyword('baz'),
+    ])
+
+    expect(parse('foo bar baz', parser)).toEqual(
+      valid([keywordValue('foo'), keywordValue('bar'), keywordValue('baz')]),
+    )
+  })
+
+  test('nested allOf', () => {
+    const parser = allOf([
+      allOf([keyword('foo'), keyword('bar')]),
       keyword('baz'),
     ])
 

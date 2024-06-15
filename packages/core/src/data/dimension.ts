@@ -1,4 +1,4 @@
-import { FULL, NOT_SATISFIED, type Parser, type ParserState } from '../parser'
+import type { Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
 
@@ -40,22 +40,20 @@ class Dimension<Units extends ReadonlySet<string>>
 {
   readonly units: ReadonlySet<string>
 
-  readonly domain: ReadonlySet<string>
+  // readonly #domain: ReadonlySet<string>
 
   #value: DimensionValue<ValuesOfSet<Units>> | null = null
 
-  get state(): ParserState {
-    return this.#value === null ? NOT_SATISFIED : FULL
-  }
-
   constructor(units: Units) {
     this.units = new Set(units)
+  }
 
-    const domain = new Set<string>()
-    for (const unit of this.units) {
-      domain.add(`\${number}${unit}`)
-    }
-    this.domain = domain
+  // get isFull(): boolean {
+  //   return this.#value !== null
+  // }
+
+  get isSatisfied(): boolean {
+    return this.#value !== null
   }
 
   feed(token: Token): boolean {
@@ -64,16 +62,13 @@ class Dimension<Units extends ReadonlySet<string>>
         if (token.value.endsWith(unit)) {
           const value = Number.parseFloat(token.value.slice(0, -unit.length))
 
-          if (Number.isNaN(value)) {
-            return false
+          if (!Number.isNaN(value)) {
+            this.#value = dimensionValue(value, unit as ValuesOfSet<Units>)
+            return true
           }
-
-          this.#value = dimensionValue(value, unit as ValuesOfSet<Units>)
-          return true
         }
       }
     }
-
     return false
   }
 

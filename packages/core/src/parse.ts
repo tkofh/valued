@@ -1,5 +1,4 @@
 import {
-  FULL,
   type ParseResult,
   type Parser,
   type ParserValue,
@@ -14,13 +13,13 @@ export function parse<P extends Parser<unknown>>(
 ): ParseResult<ParserValue<P>> {
   try {
     for (const token of tokenize(value)) {
-      if (parser.state === FULL) {
-        return invalid()
-      }
-
       if (!parser.feed(token)) {
         return invalid()
       }
+
+      // if (!parser.isSatisfied) {
+      //   return invalid()
+      // }
     }
 
     const parsed = parser.flush()

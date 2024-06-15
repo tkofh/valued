@@ -1,54 +1,44 @@
-import {
-  FULL,
-  NOT_SATISFIED,
-  type Parser,
-  type ParserState,
-  type ParserValue,
-  SATISFIED,
-} from '../parser'
+import type { Parser, ParserValue } from '../parser'
 import type { Token } from '../tokenizer'
-import { unorderedGroup } from './unofderedGroup'
-
-const TypeBrand: unique symbol = Symbol('combinator/oneOf')
 
 class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   implements Parser<ParserValue<Parsers[number]>>
 {
-  readonly [TypeBrand] = TypeBrand
-  readonly domain: ReadonlySet<string>
   readonly parsers: ReadonlySet<Parser<unknown>>
 
   #candidates: Set<Parser<unknown>> = new Set()
-
-  get state(): ParserState {
-    if (this.#candidates.size === 0) {
-      return NOT_SATISFIED
-    }
-
-    let satisfied = false
-    for (const parser of this.#candidates) {
-      // If all parsers are full, the oneOf parser is full
-      if (parser.state === FULL && this.#candidates.size === 1) {
-        return FULL
-      }
-
-      if (parser.state === SATISFIED) {
-        satisfied = true
-      }
-    }
-
-    return satisfied ? SATISFIED : NOT_SATISFIED
-  }
 
   constructor(parsers: Parsers) {
     if (parsers.length === 0) {
       throw new TypeError('oneOf() parser must have at least one parser')
     }
 
-    const group = unorderedGroup(parsers, TypeBrand)
-    this.domain = group.domain
-    this.parsers = group.parsers
+    this.parsers = new Set(parsers)
   }
+
+  get isSatisfied(): boolean {
+    for (const parser of this.#candidates) {
+      if (parser.isSatisfied) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  // get isFull(): boolean {
+  //   if (this.#candidates.size === 0) {
+  //     return false
+  //   }
+  //
+  //   for (const parser of this.#candidates) {
+  //     if (!parser.isFull) {
+  //       return false
+  //     }
+  //   }
+  //
+  //   return true
+  // }
 
   feed(token: Token): boolean {
     if (this.#candidates.size > 0) {
@@ -81,29 +71,35 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 
   #feedCandidates(token: Token): boolean {
-    let result = false
+    const consumed = new Set<Parser<unknown>>()
     for (const parser of this.#candidates) {
-      const consumed = parser.feed(token)
+      if (parser.feed(token)) {
+        consumed.add(parser)
+      }
+    }
 
-      result ||= consumed
+    if (consumed.size === 0) {
+      return false
+    }
 
-      if (!consumed) {
+    for (const parser of this.#candidates) {
+      if (!consumed.has(parser)) {
         this.#candidates.delete(parser)
       }
     }
 
-    return result
+    return true
   }
 
   #feedAll(token: Token): boolean {
     let result = false
+
     for (const parser of this.parsers) {
       const consumed = parser.feed(token)
 
-      result ||= consumed
-
       if (consumed) {
         this.#candidates.add(parser)
+        result = true
       }
     }
 
