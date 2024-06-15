@@ -17,7 +17,7 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 
   get isSatisfied(): boolean {
-    for (const parser of this.#candidates) {
+    for (const parser of this.parsers) {
       if (parser.isSatisfied) {
         return true
       }
@@ -25,20 +25,6 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
 
     return false
   }
-
-  // get isFull(): boolean {
-  //   if (this.#candidates.size === 0) {
-  //     return false
-  //   }
-  //
-  //   for (const parser of this.#candidates) {
-  //     if (!parser.isFull) {
-  //       return false
-  //     }
-  //   }
-  //
-  //   return true
-  // }
 
   feed(token: Token): boolean {
     if (this.#candidates.size > 0) {
@@ -48,7 +34,7 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 
   flush(): ParserValue<Parsers[number]> | undefined {
-    for (const parser of this.#candidates) {
+    for (const parser of this.parsers) {
       const value = parser.flush()
       if (value !== undefined) {
         return value as ParserValue<Parsers[number]>

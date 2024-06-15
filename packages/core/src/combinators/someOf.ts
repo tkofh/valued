@@ -60,18 +60,21 @@ class SomeOf<Parsers extends ReadonlyArray<Parser<unknown>>>
 
     const result = [] as Array<unknown>
 
-    if (this.#satisfied.size === 0) {
-      return undefined
-    }
+    let isSatisfied = false
 
     for (const parser of this.parsers) {
-      if (this.#satisfied.has(parser)) {
+      if (parser.isSatisfied) {
+        isSatisfied = true
         const value = parser.flush()
 
-        result.push(value ?? null)
+        result.push(value === undefined ? null : value)
       } else {
         result.push(null)
       }
+    }
+
+    if (!isSatisfied) {
+      return undefined
     }
 
     return result as ExtractParserValues<Parsers>

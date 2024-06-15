@@ -7,14 +7,43 @@
   "homepage": "https://github.com/tkofh/css-value-parser#readme",
   "license": "MIT",
   "type": "module",
+  "main": "dist/parse.cjs",
+  "module": "dist/parse.mjs",
+  "types": "dist/parse.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/parse.mjs",
+      "require": "./dist/parse.cjs",
+      "types": "./dist/parse.d.ts"
+    },
+    "./data": {
+      "import": "./dist/data.mjs",
+      "require": "./dist/data.cjs",
+      "types": "./dist/data.d.ts"
+    },
+    "./data/*": {
+      "import": "./dist/data/*.mjs",
+      "types": "./dist/data/*.d.ts"
+    },
+    "./combinators": {
+      "import": "./dist/combinators.mjs",
+      "require": "./dist/combinators.cjs",
+      "types": "./dist/combinators.d.ts"
+    },
+    "./combinators/*": {
+      "import": "./dist/combinators/*.mjs",
+      "types": "./dist/combinators/*.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsx ./src/index.ts",
+    "build": "unbuild",
     "test": "vitest run"
   },
   "bugs": {
     "url": "https://github.com/tkofh/css-value-parser/issues"
   },
   "devDependencies": {
+    "@repo/tsconfig": "workspace:^",
     "@types/node": "^20.13.0",
     "@vitest/coverage-v8": "^1.6.0",
     "tsx": "^4.11.0",
