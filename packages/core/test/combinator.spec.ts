@@ -5,6 +5,7 @@ import { oneOf } from '../src/combinators/oneOf'
 import { someOf } from '../src/combinators/someOf'
 import { dimension, dimensionValue } from '../src/data/dimension'
 import { keyword, keywordValue } from '../src/data/keyword'
+import { optional } from '../src/multipliers'
 import { parse } from '../src/parse'
 import { invalid, valid } from '../src/parser'
 
@@ -51,6 +52,17 @@ describe('someOf', () => {
       valid([keywordValue('foo'), keywordValue('bar')]),
     ],
     [someOf([keyword('foo'), keyword('bar')]), 'foo bar foo', invalid()],
+    [
+      someOf([
+        juxtapose([keyword('foo'), optional(keyword('bar'))]),
+        juxtapose([keyword('baz'), keyword('qux')]),
+      ]),
+      'foo baz qux',
+      valid([
+        [keywordValue('foo'), null],
+        [keywordValue('baz'), keywordValue('qux')],
+      ]),
+    ],
   ] as const
 
   for (const [parser, input, output] of cases) {

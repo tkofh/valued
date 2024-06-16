@@ -28,13 +28,7 @@ export function isColorValue(value: unknown): value is ColorValue {
 }
 
 class ColorParser implements Parser<ColorValue> {
-  static #shape = [new Set('<color>')] as const
-
   #value: ColorValue | null = null
-
-  // get isFull(): boolean {
-  //   return this.#value !== null
-  // }
 
   get isSatisfied(): boolean {
     return this.#value !== null

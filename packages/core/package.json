@@ -21,18 +21,15 @@
       "require": "./dist/data.cjs",
       "types": "./dist/data.d.ts"
     },
-    "./data/*": {
-      "import": "./dist/data/*.mjs",
-      "types": "./dist/data/*.d.ts"
-    },
     "./combinators": {
       "import": "./dist/combinators.mjs",
       "require": "./dist/combinators.cjs",
       "types": "./dist/combinators.d.ts"
     },
-    "./combinators/*": {
-      "import": "./dist/combinators/*.mjs",
-      "types": "./dist/combinators/*.d.ts"
+    "./multipliers": {
+      "import": "./dist/multipliers.mjs",
+      "require": "./dist/multipliers.cjs",
+      "types": "./dist/multipliers.d.ts"
     }
   },
   "scripts": {

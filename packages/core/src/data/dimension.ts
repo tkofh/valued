@@ -40,17 +40,11 @@ class Dimension<Units extends ReadonlySet<string>>
 {
   readonly units: ReadonlySet<string>
 
-  // readonly #domain: ReadonlySet<string>
-
   #value: DimensionValue<ValuesOfSet<Units>> | null = null
 
   constructor(units: Units) {
     this.units = new Set(units)
   }
-
-  // get isFull(): boolean {
-  //   return this.#value !== null
-  // }
 
   get isSatisfied(): boolean {
     return this.#value !== null

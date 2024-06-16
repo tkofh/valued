@@ -29,6 +29,10 @@ class Optional<P extends Parser<unknown>>
   reset(): void {
     this.parser.reset()
   }
+
+  toString(): string {
+    return `${this.parser.toString()}?`
+  }
 }
 
 export function optional<P extends Parser<unknown>>(parser: P): Optional<P> {

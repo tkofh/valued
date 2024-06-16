@@ -34,14 +34,19 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 
   flush(): ParserValue<Parsers[number]> | undefined {
+    let result: ParserValue<Parsers[number]> | undefined = undefined
     for (const parser of this.parsers) {
-      const value = parser.flush()
-      if (value !== undefined) {
-        return value as ParserValue<Parsers[number]>
+      const value = parser.flush() as ParserValue<Parsers[number]> | undefined
+
+      if (
+        value !== undefined &&
+        (result === undefined || (Array.isArray(result) && result.length === 0))
+      ) {
+        result = value
       }
     }
 
-    return undefined
+    return result
   }
 
   reset(): void {

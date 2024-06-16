@@ -1,3 +1,3 @@
-export { keyword } from './data/keyword'
-export { dimension } from './data/dimension'
-export { color } from './data/color'
+export { keyword, isKeywordValue } from './data/keyword'
+export { dimension, isDimensionValue } from './data/dimension'
+export { color, isColorValue } from './data/color'

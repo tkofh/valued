@@ -40,7 +40,11 @@ class Keyword<Value extends string> implements Parser<KeywordValue<Value>> {
   }
 
   feed(token: Token): boolean {
-    if (token.type === 'literal' && token.value === this.keyword) {
+    if (
+      token.type === 'literal' &&
+      token.value === this.keyword &&
+      this.#value === null
+    ) {
       this.#value = keywordValue(token.value as Value)
       return true
     }

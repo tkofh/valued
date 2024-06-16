@@ -61,7 +61,7 @@ function* chunksToAst(
       } else {
         yield { type: 'parenthetical', tokens: Array.from(chunksToAst(tokens)) }
       }
-    } else if (!whitespace.has(token)) {
+    } else if (!whitespace.has(token[0] as string)) {
       if (outgoing) {
         yield outgoing
       }

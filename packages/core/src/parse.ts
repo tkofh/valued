@@ -16,10 +16,6 @@ export function parse<P extends Parser<unknown>>(
       if (!parser.feed(token)) {
         return invalid()
       }
-
-      // if (!parser.isSatisfied) {
-      //   return invalid()
-      // }
     }
 
     const parsed = parser.flush()

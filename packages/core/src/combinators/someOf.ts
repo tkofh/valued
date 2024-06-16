@@ -56,7 +56,7 @@ class SomeOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 
   flush(): ExtractParserValues<Parsers> | undefined {
-    this.#markCandidateAsSatisfied()
+    this.#resolveCandidates()
 
     const result = [] as Array<unknown>
 
@@ -105,19 +105,6 @@ class SomeOf<Parsers extends ReadonlyArray<Parser<unknown>>>
       for (const parser of this.#candidates) {
         if (rejected.has(parser)) {
           this.#candidates.delete(parser)
-        }
-      }
-
-      return true
-    }
-
-    if (this.#feedAll(token)) {
-      this.#markCandidateAsSatisfied()
-
-      for (const parser of this.#candidates) {
-        this.#candidates.delete(parser)
-
-        if (!parser.isSatisfied) {
           parser.reset()
         }
       }
@@ -125,15 +112,24 @@ class SomeOf<Parsers extends ReadonlyArray<Parser<unknown>>>
       return true
     }
 
+    const candidates = new Set(this.#candidates)
+    if (this.#feedAll(token)) {
+      this.#resolveCandidates(candidates)
+
+      return true
+    }
+
     return false
   }
 
-  #markCandidateAsSatisfied() {
-    for (const parser of this.#candidates) {
+  #resolveCandidates(candidates: Set<Parsers[number]> = this.#candidates) {
+    for (const parser of candidates) {
       if (parser.isSatisfied) {
         this.#satisfied.add(parser)
-        this.#candidates.delete(parser)
+      } else {
+        parser.reset()
       }
+      this.#candidates.delete(parser)
     }
   }
 
