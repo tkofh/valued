@@ -1,5 +1,5 @@
 {
-  "name": "css-value-parser",
+  "name": "valued",
   "private": true,
   "scripts": {
     "build": "turbo run build",

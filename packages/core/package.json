@@ -1,9 +1,9 @@
 {
-  "name": "css-value-parser",
-  "version": "0.0.0",
+  "name": "valued",
+  "version": "0.1.0",
   "private": true,
-  "description": "Parse CSS values in Javascript",
-  "author": "Tim Morris <timthewebguy@gmail.com>",
+  "description": "parse strings as css values",
+  "author": "tim morris <timthewebguy@gmail.com>",
   "homepage": "https://github.com/tkofh/css-value-parser#readme",
   "license": "MIT",
   "type": "module",
