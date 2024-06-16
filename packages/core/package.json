@@ -1,7 +1,6 @@
 {
   "name": "valued",
-  "version": "0.2.0",
-  "private": true,
+  "version": "0.1.0",
   "description": "parse strings as css values",
   "author": "tim morris <timthewebguy@gmail.com>",
   "homepage": "https://github.com/tkofh/css-value-parser#readme",
@@ -45,9 +44,9 @@
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:^",
-    "@types/node": "^20.13.0",
+    "@types/node": "^20.14.2",
     "@vitest/coverage-v8": "^1.6.0",
-    "tsx": "^4.11.0",
+    "tsx": "^4.15.5",
     "typescript": "^5.4.5",
     "unbuild": "^2.0.0",
     "vitest": "^1.6.0"
