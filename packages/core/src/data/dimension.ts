@@ -35,15 +35,17 @@ export function isDimensionValue<Unit extends string>(
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class Dimension<Units extends ReadonlySet<string>>
+class DimensionParser<Units extends ReadonlySet<string>>
   implements Parser<DimensionValue<ValuesOfSet<Units>>>
 {
   readonly units: ReadonlySet<string>
+  readonly defaultUnit: ValuesOfSet<Units> | null
 
   #value: DimensionValue<ValuesOfSet<Units>> | null = null
 
-  constructor(units: Units) {
+  constructor(units: Units, defaultUnit: ValuesOfSet<Units> | null = null) {
     this.units = new Set(units)
+    this.defaultUnit = defaultUnit
   }
 
   get isSatisfied(): boolean {
@@ -60,6 +62,15 @@ class Dimension<Units extends ReadonlySet<string>>
             this.#value = dimensionValue(value, unit as ValuesOfSet<Units>)
             return true
           }
+        }
+      }
+
+      if (this.defaultUnit !== null) {
+        const value = Number(token.value)
+
+        if (!Number.isNaN(value)) {
+          this.#value = dimensionValue(value, this.defaultUnit)
+          return true
         }
       }
     }
@@ -83,8 +94,11 @@ class Dimension<Units extends ReadonlySet<string>>
   }
 }
 
+export type { DimensionParser, DimensionValue }
+
 export function dimension<const Units extends ReadonlyArray<string>>(
   units: Units,
-): Dimension<ReadonlySet<Units[number]>> {
-  return new Dimension(new Set(units))
+  defaultUnit: NoInfer<Units[number]> | null = null,
+): DimensionParser<ReadonlySet<Units[number]>> {
+  return new DimensionParser(new Set(units), defaultUnit)
 }

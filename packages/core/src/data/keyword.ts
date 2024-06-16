@@ -26,7 +26,9 @@ export function isKeywordValue<Value extends string>(
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class Keyword<Value extends string> implements Parser<KeywordValue<Value>> {
+class KeywordParser<Value extends string>
+  implements Parser<KeywordValue<Value>>
+{
   readonly keyword: string
 
   #value: KeywordValue<Value> | null = null
@@ -68,6 +70,10 @@ class Keyword<Value extends string> implements Parser<KeywordValue<Value>> {
   }
 }
 
-export function keyword<Value extends string>(value: Value): Keyword<Value> {
-  return new Keyword(value)
+export type { KeywordParser, KeywordValue }
+
+export function keyword<Value extends string>(
+  value: Value,
+): KeywordParser<Value> {
+  return new KeywordParser(value)
 }

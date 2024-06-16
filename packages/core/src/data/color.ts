@@ -64,6 +64,8 @@ class ColorParser implements Parser<ColorValue> {
   }
 }
 
+export type { ColorValue, ColorParser }
+
 export function color(): ColorParser {
   return new ColorParser()
 }
