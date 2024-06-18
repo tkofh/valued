@@ -5,10 +5,6 @@ type ExtractParserValues<T extends ReadonlyArray<unknown>> = {
   [K in keyof T]: T[K] extends Parser<infer U> ? U | null : never
 }
 
-function stringifyParsers(parsers: ReadonlySet<Parser<unknown>>) {
-  return Array.from(parsers, (parser) => parser.toString())
-}
-
 class SomeOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   implements Parser<ExtractParserValues<Parsers>>
 {
