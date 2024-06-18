@@ -10,14 +10,20 @@ class Optional<P extends Parser<unknown>>
     this.parser = parser
   }
 
-  readonly isSatisfied = true
+  satisfied(): boolean {
+    return true
+  }
 
   feed(token: Token): boolean {
     return this.parser.feed(token)
   }
 
-  flush(): ParserValue<P> | null {
-    const value = this.parser.flush() as ParserValue<P>
+  check(token: Token, state: 'current' | 'initial'): boolean {
+    return this.parser.check(token, state)
+  }
+
+  read(): ParserValue<P> | null {
+    const value = this.parser.read() as ParserValue<P>
 
     if (value !== undefined) {
       return value

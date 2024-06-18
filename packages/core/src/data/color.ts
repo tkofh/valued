@@ -30,8 +30,8 @@ export function isColorValue(value: unknown): value is ColorValue {
 class ColorParser implements Parser<ColorValue> {
   #value: ColorValue | null = null
 
-  get isSatisfied(): boolean {
-    return this.#value !== null
+  satisfied(state: 'initial' | 'current' = 'current'): boolean {
+    return state === 'current' && this.#value !== null
   }
 
   feed(token: Token): boolean {
@@ -47,7 +47,15 @@ class ColorParser implements Parser<ColorValue> {
     return false
   }
 
-  flush(): ColorValue | undefined {
+  check(token: Token, state: 'current' | 'initial'): boolean {
+    if (this.#value !== null && state === 'current') {
+      return false
+    }
+
+    return token.type === 'literal' && colorValue(token.value) !== false
+  }
+
+  read(): ColorValue | undefined {
     if (this.#value === null) {
       return undefined
     }

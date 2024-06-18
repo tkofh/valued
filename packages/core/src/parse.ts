@@ -18,7 +18,7 @@ export function parse<P extends Parser<unknown>>(
       }
     }
 
-    const parsed = parser.flush()
+    const parsed = parser.read()
 
     if (parsed === undefined) {
       return invalid()

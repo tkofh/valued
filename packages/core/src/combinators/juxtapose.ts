@@ -42,13 +42,14 @@ class Juxtapose<Parsers extends ReadonlyArray<Parser<unknown> | string>>
     this.structure = storage
   }
 
-  get isSatisfied(): boolean {
-    for (let i = this.#index; i < this.structure.length; i++) {
+  satisfied(state: 'initial' | 'current' = 'current'): boolean {
+    const start = state === 'initial' ? 0 : this.#index
+    for (let i = start; i < this.structure.length; i++) {
       const parser = this.structure[i]
       if (typeof parser === 'string') {
         return false
       }
-      if (typeof parser === 'object' && !parser.isSatisfied) {
+      if (typeof parser === 'object' && !parser.satisfied(state)) {
         return false
       }
     }
@@ -60,12 +61,16 @@ class Juxtapose<Parsers extends ReadonlyArray<Parser<unknown> | string>>
     return this.#feed(token)
   }
 
-  flush(): JuxtaposeValue<Parsers> | undefined {
+  check(token: Token, state: 'current' | 'initial' = 'current'): boolean {
+    return this.#check(token, state)
+  }
+
+  read(): JuxtaposeValue<Parsers> | undefined {
     const result = [] as JuxtaposeValue<Parsers>
 
     for (const parser of this.structure) {
       if (typeof parser !== 'string') {
-        const value = parser.flush()
+        const value = parser.read()
 
         if (value === undefined) {
           return undefined
@@ -109,12 +114,37 @@ class Juxtapose<Parsers extends ReadonlyArray<Parser<unknown> | string>>
     const consumed = element.feed(token)
 
     if (!consumed) {
-      if (element.isSatisfied) {
+      if (element.satisfied()) {
         this.#index += 1
         return this.#feed(token)
       }
 
       return false
+    }
+
+    return true
+  }
+
+  #check(token: Token, state: 'current' | 'initial'): boolean {
+    if (this.#index === this.structure.length && state === 'current') {
+      return false
+    }
+
+    for (const element of this.structure.slice(
+      state === 'initial' ? 0 : this.#index,
+    )) {
+      if (typeof element === 'string') {
+        return token.type === 'literal' && token.value === element
+      }
+
+      const consumed = element.check(token, state)
+
+      if (consumed) {
+        return true
+      }
+      if (!element.satisfied(state)) {
+        return false
+      }
     }
 
     return true

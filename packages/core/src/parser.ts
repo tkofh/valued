@@ -1,9 +1,10 @@
 import type { Token } from './tokenizer'
 
 export interface Parser<T> {
-  readonly isSatisfied: boolean
+  satisfied(state?: 'initial' | 'current'): boolean
   feed(token: Token): boolean
-  flush(): T | undefined
+  check(token: Token, state?: 'initial' | 'current'): boolean
+  read(): T | undefined
   reset(): void
   toString(): string
 }

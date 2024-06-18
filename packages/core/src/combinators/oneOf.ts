@@ -16,9 +16,9 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     this.parsers = new Set(parsers)
   }
 
-  get isSatisfied(): boolean {
+  satisfied(state: 'initial' | 'current' = 'current'): boolean {
     for (const parser of this.parsers) {
-      if (parser.isSatisfied) {
+      if (parser.satisfied(state)) {
         return true
       }
     }
@@ -33,20 +33,16 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     return this.#feedAll(token)
   }
 
-  flush(): ParserValue<Parsers[number]> | undefined {
-    let result: ParserValue<Parsers[number]> | undefined = undefined
-    for (const parser of this.parsers) {
-      const value = parser.flush() as ParserValue<Parsers[number]> | undefined
-
-      if (
-        value !== undefined &&
-        (result === undefined || (Array.isArray(result) && result.length === 0))
-      ) {
-        result = value
-      }
+  check(token: Token, state: 'current' | 'initial'): boolean {
+    if (this.#candidates.size > 0 && state === 'current') {
+      return this.#checkCandidates(token)
     }
 
-    return result
+    return this.#checkAll(token, state)
+  }
+
+  read(): ParserValue<Parsers[number]> | undefined {
+    return this.#readCandidates() ?? this.#readAll()
   }
 
   reset(): void {
@@ -91,6 +87,66 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
       if (consumed) {
         this.#candidates.add(parser)
         result = true
+      }
+    }
+
+    return result
+  }
+
+  #checkCandidates(token: Token): boolean {
+    for (const parser of this.#candidates) {
+      if (parser.check(token, 'current')) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  #checkAll(token: Token, state: 'current' | 'initial'): boolean {
+    for (const parser of this.parsers) {
+      if (parser.check(token, state)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  #readCandidates(): ParserValue<Parsers[number]> | undefined {
+    if (this.#candidates.size === 0) {
+      return undefined
+    }
+
+    let result: ParserValue<Parsers[number]> | undefined = undefined
+    for (const parser of this.#candidates) {
+      const value = parser.read() as ParserValue<Parsers[number]> | undefined
+
+      if (
+        value !== undefined &&
+        (result === undefined || (Array.isArray(result) && result.length === 0))
+      ) {
+        result = value
+      }
+    }
+
+    return result
+  }
+
+  #readAll(): ParserValue<Parsers[number]> | undefined {
+    let result: ParserValue<Parsers[number]> | undefined = undefined
+    for (const parser of this.parsers) {
+      if (this.#candidates.has(parser)) {
+        continue
+      }
+
+      const value = parser.read() as ParserValue<Parsers[number]> | undefined
+
+      if (
+        value !== undefined &&
+        (result === undefined || (Array.isArray(result) && result.length === 0))
+      ) {
+        result = value
       }
     }
 

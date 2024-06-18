@@ -37,8 +37,8 @@ class KeywordParser<Value extends string>
     this.keyword = keyword
   }
 
-  get isSatisfied(): boolean {
-    return this.#value !== null
+  satisfied(state: 'initial' | 'current' = 'current'): boolean {
+    return state === 'current' && this.#value !== null
   }
 
   feed(token: Token): boolean {
@@ -53,7 +53,15 @@ class KeywordParser<Value extends string>
     return false
   }
 
-  flush(): KeywordValue<Value> | undefined {
+  check(token: Token, state: 'initial' | 'current'): boolean {
+    return (
+      token.type === 'literal' &&
+      token.value === this.keyword &&
+      (state === 'initial' || this.#value === null)
+    )
+  }
+
+  read(): KeywordValue<Value> | undefined {
     if (this.#value === null) {
       return undefined
     }

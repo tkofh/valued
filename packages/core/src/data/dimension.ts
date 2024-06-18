@@ -1,6 +1,10 @@
+import {
+  type InternalDimensionOptions,
+  InternalDimensionParser,
+  type InternalDimensionValue,
+} from '../internal/dimension'
 import type { Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
 
 type ValuesOfSet<T extends ReadonlySet<unknown>> = T extends ReadonlySet<
   infer U
@@ -10,7 +14,9 @@ type ValuesOfSet<T extends ReadonlySet<unknown>> = T extends ReadonlySet<
 
 const TypeBrand: unique symbol = Symbol('data/dimension')
 
-class DimensionValue<Unit extends string> {
+class DimensionValue<Unit extends string>
+  implements InternalDimensionValue<Unit>
+{
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number
@@ -35,62 +41,14 @@ export function isDimensionValue<Unit extends string>(
   return isRecordOrArray(value) && TypeBrand in value
 }
 
+interface DimensionOptions extends InternalDimensionOptions {}
+
 class DimensionParser<Units extends ReadonlySet<string>>
+  extends InternalDimensionParser<Units, DimensionValue<ValuesOfSet<Units>>>
   implements Parser<DimensionValue<ValuesOfSet<Units>>>
 {
-  readonly units: ReadonlySet<string>
-  readonly defaultUnit: ValuesOfSet<Units> | null
-
-  #value: DimensionValue<ValuesOfSet<Units>> | null = null
-
-  constructor(units: Units, defaultUnit: ValuesOfSet<Units> | null = null) {
-    this.units = new Set(units)
-    this.defaultUnit = defaultUnit
-  }
-
-  get isSatisfied(): boolean {
-    return this.#value !== null
-  }
-
-  feed(token: Token): boolean {
-    if (token.type === 'literal') {
-      for (const unit of this.units) {
-        if (token.value.endsWith(unit)) {
-          const value = Number.parseFloat(token.value.slice(0, -unit.length))
-
-          if (!Number.isNaN(value)) {
-            this.#value = dimensionValue(value, unit as ValuesOfSet<Units>)
-            return true
-          }
-        }
-      }
-
-      if (this.defaultUnit !== null) {
-        const value = Number(token.value)
-
-        if (!Number.isNaN(value)) {
-          this.#value = dimensionValue(value, this.defaultUnit)
-          return true
-        }
-      }
-    }
-    return false
-  }
-
-  flush(): DimensionValue<ValuesOfSet<Units>> | undefined {
-    if (this.#value === null) {
-      return undefined
-    }
-
-    return this.#value
-  }
-
-  reset(): void {
-    this.#value = null
-  }
-
-  toString(): string {
-    return '<dimension>'
+  constructor(units: Units, options?: DimensionOptions) {
+    super('dimension', units, dimensionValue, options)
   }
 }
 
@@ -98,7 +56,7 @@ export type { DimensionParser, DimensionValue }
 
 export function dimension<const Units extends ReadonlyArray<string>>(
   units: Units,
-  defaultUnit: NoInfer<Units[number]> | null = null,
+  options?: DimensionOptions,
 ): DimensionParser<ReadonlySet<Units[number]>> {
-  return new DimensionParser(new Set(units), defaultUnit)
+  return new DimensionParser(new Set(units), options)
 }

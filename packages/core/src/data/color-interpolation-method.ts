@@ -1,5 +1,6 @@
 import { juxtapose, oneOf } from '../combinators'
 import { optional } from '../multipliers'
+import { hueInterpolationMethod } from './hue-interpolation-method'
 import { keyword } from './keyword'
 
 const rectangularColorSpace = oneOf([
@@ -21,16 +22,6 @@ const polarColorSpace = oneOf([
   keyword('hwb'),
   keyword('lch'),
   keyword('oklch'),
-])
-
-const hueInterpolationMethod = juxtapose([
-  oneOf([
-    keyword('shorter'),
-    keyword('longer'),
-    keyword('increasing'),
-    keyword('decreasing'),
-  ]),
-  'hue',
 ])
 
 export const colorInterpolationMethod = juxtapose([

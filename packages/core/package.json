@@ -12,22 +12,118 @@
   "exports": {
     ".": {
       "import": "./dist/parse.mjs",
-      "require": "./dist/parse.cjs",
       "types": "./dist/parse.d.ts"
     },
-    "./data": {
-      "import": "./dist/data.mjs",
-      "require": "./dist/data.cjs",
-      "types": "./dist/data.d.ts"
+    "./data/absolute-size": {
+      "import": "./dist/data/absolute-size.mjs",
+      "types": "./dist/data/absolute-size.d.ts"
+    },
+    "./data/alpha-value": {
+      "import": "./dist/data/alpha-value.mjs",
+      "types": "./dist/data/alpha-value.d.ts"
+    },
+    "./data/angle": {
+      "import": "./dist/data/angle.mjs",
+      "types": "./dist/data/angle.d.ts"
+    },
+    "./data/angle-percentage": {
+      "import": "./dist/data/angle-percentage.mjs",
+      "types": "./dist/data/angle-percentage.d.ts"
+    },
+    "./data/blend-mode": {
+      "import": "./dist/data/blend-mode.mjs",
+      "types": "./dist/data/blend-mode.d.ts"
+    },
+    "./data/color": {
+      "import": "./dist/data/color.mjs",
+      "types": "./dist/data/color.d.ts"
+    },
+    "./data/color-interpolation-method": {
+      "import": "./dist/data/color-interpolation-method.mjs",
+      "types": "./dist/data/color-interpolation-method.d.ts"
+    },
+    "./data/dimension": {
+      "import": "./dist/data/dimension.mjs",
+      "types": "./dist/data/dimension.d.ts"
+    },
+    "./data/display": {
+      "import": "./dist/data/display.mjs",
+      "types": "./dist/data/display.d.ts"
+    },
+    "./data/flex": {
+      "import": "./dist/data/flex.mjs",
+      "types": "./dist/data/flex.d.ts"
+    },
+    "./data/frequency": {
+      "import": "./dist/data/frequency.mjs",
+      "types": "./dist/data/frequency.d.ts"
+    },
+    "./data/frequency-percentage": {
+      "import": "./dist/data/frequency-percentage.mjs",
+      "types": "./dist/data/frequency-percentage.d.ts"
+    },
+    "./data/generic-family": {
+      "import": "./dist/data/generic-family.mjs",
+      "types": "./dist/data/generic-family.d.ts"
+    },
+    "./data/hue": {
+      "import": "./dist/data/hue.mjs",
+      "types": "./dist/data/hue.d.ts"
+    },
+    "./data/hue-interpolation-method": {
+      "import": "./dist/data/hue-interpolation-method.mjs",
+      "types": "./dist/data/hue-interpolation-method.d.ts"
+    },
+    "./data/integer": {
+      "import": "./dist/data/integer.mjs",
+      "types": "./dist/data/integer.d.ts"
+    },
+    "./data/keyword": {
+      "import": "./dist/data/keyword.mjs",
+      "types": "./dist/data/keyword.d.ts"
+    },
+    "./data/length": {
+      "import": "./dist/data/length.mjs",
+      "types": "./dist/data/length.d.ts"
+    },
+    "./data/length-percentage": {
+      "import": "./dist/data/length-percentage.mjs",
+      "types": "./dist/data/length-percentage.d.ts"
+    },
+    "./data/line-style": {
+      "import": "./dist/data/line-style.mjs",
+      "types": "./dist/data/line-style.d.ts"
+    },
+    "./data/number": {
+      "import": "./dist/data/number.mjs",
+      "types": "./dist/data/number.d.ts"
+    },
+    "./data/overflow": {
+      "import": "./dist/data/overflow.mjs",
+      "types": "./dist/data/overflow.d.ts"
+    },
+    "./data/percentage": {
+      "import": "./dist/data/percentage.mjs",
+      "types": "./dist/data/percentage.d.ts"
+    },
+    "./data/position": {
+      "import": "./dist/data/position.mjs",
+      "types": "./dist/data/position.d.ts"
+    },
+    "./data/ratio": {
+      "import": "./dist/data/ratio.mjs",
+      "types": "./dist/data/ratio.d.ts"
+    },
+    "./data/relative-size": {
+      "import": "./dist/data/relative-size.mjs",
+      "types": "./dist/data/relative-size.d.ts"
     },
     "./combinators": {
       "import": "./dist/combinators.mjs",
-      "require": "./dist/combinators.cjs",
       "types": "./dist/combinators.d.ts"
     },
     "./multipliers": {
       "import": "./dist/multipliers.mjs",
-      "require": "./dist/multipliers.cjs",
       "types": "./dist/multipliers.d.ts"
     }
   },

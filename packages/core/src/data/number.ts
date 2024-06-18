@@ -1,3 +1,4 @@
+import { InternalNumberParser } from '../internal/number'
 import type { Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
@@ -22,18 +23,31 @@ export function isNumberValue(value: unknown): value is NumberValue {
   return isRecordOrArray(value) && TypeBrand in value
 }
 
+interface NumberOptions {
+  min?: number | false | null | undefined
+  max?: number | false | null | undefined
+}
+
 class NumberParser implements Parser<NumberValue> {
   #value: NumberValue | null = null
+  #parser: InternalNumberParser
 
-  get isSatisfied(): boolean {
-    return this.#value !== null
+  constructor(options?: NumberOptions) {
+    this.#parser = new InternalNumberParser(
+      options?.min ?? false,
+      options?.max ?? false,
+    )
+  }
+
+  satisfied(state: 'initial' | 'current' = 'current'): boolean {
+    return state === 'current' && this.#value !== null
   }
 
   feed(token: Token): boolean {
     if (token.type === 'literal') {
-      const value = Number.parseFloat(token.value)
+      const value = this.#parser.parse(token.value)
 
-      if (!Number.isNaN(value)) {
+      if (value !== false) {
         this.#value = numberValue(value)
         return true
       }
@@ -41,7 +55,11 @@ class NumberParser implements Parser<NumberValue> {
     return false
   }
 
-  flush(): NumberValue | undefined {
+  check(token: Token): boolean {
+    return token.type === 'literal' && this.#parser.parse(token.value) !== false
+  }
+
+  read(): NumberValue | undefined {
     if (this.#value === null) {
       return undefined
     }
@@ -54,12 +72,12 @@ class NumberParser implements Parser<NumberValue> {
   }
 
   toString(): string {
-    return '<number>'
+    return this.#parser.toString()
   }
 }
 
 export type { NumberValue, NumberParser }
 
-export function number(): NumberParser {
-  return new NumberParser()
+export function number(options?: NumberOptions): NumberParser {
+  return new NumberParser(options)
 }
