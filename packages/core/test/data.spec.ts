@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import { angle, angleValue } from '../src/data/angle'
 import { color, colorValue } from '../src/data/color'
 import { dimension, dimensionValue } from '../src/data/dimension'
 import { keyword, keywordValue } from '../src/data/keyword'
@@ -183,4 +184,43 @@ describe('position', () => {
       expect(parse(input, position)).toEqual(valid(output))
     })
   }
+})
+
+describe('angle', () => {
+  const validCases = [
+    ['45deg', angleValue(45, 'deg')],
+    ['45deg', angleValue(45, 'deg')],
+    ['45grad', angleValue(45, 'grad')],
+    ['45rad', angleValue(45, 'rad')],
+    ['45turn', angleValue(45, 'turn')],
+  ] as const
+
+  for (const [input, output] of validCases) {
+    test(`treats \`${input}\` as valid`, () => {
+      expect(parse(input, angle())).toEqual(valid(output))
+    })
+  }
+
+  test('throws an error when an unknown unit is provided', () => {
+    // @ts-expect-error
+    expect(() => angleValue(45, 'foo')).toThrow()
+  })
+
+  test('normalizes values correctly', () => {
+    expect(angleValue(90, 'deg').normalized).toBeCloseTo(
+      angleValue(Math.PI / 2, 'rad').normalized,
+    )
+
+    expect(angleValue(Math.PI / 2, 'rad').normalized).toBeCloseTo(
+      angleValue(100, 'grad').normalized,
+    )
+
+    expect(angleValue(100, 'grad').normalized).toBeCloseTo(
+      angleValue(0.25, 'turn').normalized,
+    )
+
+    expect(angleValue(0.25, 'turn').normalized).toBeCloseTo(
+      angleValue(90, 'deg').normalized,
+    )
+  })
 })

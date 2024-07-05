@@ -9,9 +9,16 @@ import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/angle')
 
-const angleUnits = new Set(['deg', 'grad', 'rad', 'turn'] as const)
+const angleDenominators = new Map([
+  ['deg', 360],
+  ['grad', 400],
+  ['rad', Math.PI * 2],
+  ['turn', 1],
+] as const)
+
+const angleUnits = new Set(angleDenominators.keys())
 type AngleUnits = typeof angleUnits
-type AngleUnit = ValuesOfSet<AngleUnits>
+export type AngleUnit = ValuesOfSet<AngleUnits>
 
 class AngleValue implements InternalDimensionValue<AngleUnit> {
   readonly [TypeBrand] = TypeBrand
@@ -19,9 +26,18 @@ class AngleValue implements InternalDimensionValue<AngleUnit> {
   readonly value: number
   readonly unit: AngleUnit
 
+  readonly normalized: number
+
   constructor(value: number, unit: AngleUnit) {
     this.value = value
     this.unit = unit
+
+    const denominator = angleDenominators.get(unit)
+    if (denominator === undefined) {
+      throw new TypeError(`unknown angle unit ${unit}`)
+    }
+
+    this.normalized = value / denominator
   }
 }
 
