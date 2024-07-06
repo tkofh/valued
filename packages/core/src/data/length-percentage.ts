@@ -64,55 +64,86 @@ const lengthPercentageUnits = new Set([
 type LengthPercentageUnits = typeof lengthPercentageUnits
 type LengthPercentageUnit = ValuesOfSet<LengthPercentageUnits>
 
-export type LengthPercentageInput = `${number}${LengthPercentageUnit}`
+export type LengthPercentageInput<Unit extends LengthPercentageUnit> =
+  `${number}${Unit}`
 
-class LengthPercentageValue
-  implements InternalDimensionValue<LengthPercentageUnit>
+class LengthPercentageValue<Unit extends LengthPercentageUnit>
+  implements InternalDimensionValue<Unit>
 {
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number
-  readonly unit: LengthPercentageUnit
+  readonly unit: Unit
 
-  constructor(value: number, unit: LengthPercentageUnit) {
+  constructor(value: number, unit: Unit) {
     this.value = value
     this.unit = unit
   }
 }
 
-export function lengthPercentageValue(
+export function lengthPercentageValue<Unit extends LengthPercentageUnit>(
   value: number,
-  unit: LengthPercentageUnit,
-): LengthPercentageValue {
+  unit: Unit,
+): LengthPercentageValue<Unit> {
   return new LengthPercentageValue(value, unit)
 }
 
-export function isLengthPercentageValue(
+export function isLengthPercentageValue<Unit extends LengthPercentageUnit>(
   value: unknown,
-): value is LengthPercentageValue {
+): value is LengthPercentageValue<Unit> {
   return isRecordOrArray(value) && TypeBrand in value
 }
 
 interface LengthPercentageOptions extends InternalDimensionOptions {}
 
-class LengthPercentageParser
-  extends InternalDimensionParser<LengthPercentageUnits, LengthPercentageValue>
-  implements Parser<LengthPercentageValue, LengthPercentageInput>
+class LengthPercentageParser<Units extends ReadonlySet<LengthPercentageUnit>>
+  extends InternalDimensionParser<
+    Units,
+    LengthPercentageValue<ValuesOfSet<Units>>
+  >
+  implements
+    Parser<
+      LengthPercentageValue<ValuesOfSet<Units>>,
+      LengthPercentageInput<ValuesOfSet<Units>>
+    >
 {
-  constructor(options?: LengthPercentageOptions) {
-    super(
-      'lengthPercentage',
-      lengthPercentageUnits,
-      lengthPercentageValue,
-      options,
-    )
+  constructor(units: Units, options?: LengthPercentageOptions) {
+    super('lengthPercentage', units, lengthPercentageValue, options)
   }
 }
 
 export type { LengthPercentageParser, LengthPercentageValue }
 
-export function lengthPercentage(
-  options?: LengthPercentageOptions,
-): LengthPercentageParser {
-  return new LengthPercentageParser(options)
+type LengthPercentageConstructor = {
+  <const Units extends ReadonlyArray<LengthPercentageUnit>>(
+    options?: LengthPercentageOptions,
+  ): LengthPercentageParser<ReadonlySet<Units[number]>>
+  subset<const Units extends ReadonlyArray<LengthPercentageUnit>>(
+    units: Units,
+    options?: LengthPercentageOptions,
+  ): LengthPercentageParser<ReadonlySet<Units[number]>>
 }
+
+const length = function length(
+  options?: LengthPercentageOptions,
+): LengthPercentageParser<LengthPercentageUnits> {
+  return new LengthPercentageParser(lengthPercentageUnits, options)
+} as LengthPercentageConstructor
+
+length.subset = function lengthSubset<
+  const Units extends ReadonlyArray<string>,
+>(
+  units: Units,
+  options?: LengthPercentageOptions,
+): LengthPercentageParser<ReadonlySet<Units[number] & LengthPercentageUnit>> {
+  const intersection: Set<Units[number] & LengthPercentageUnit> = new Set()
+  for (const unit of units) {
+    if (lengthPercentageUnits.has(unit as LengthPercentageUnit)) {
+      intersection.add(unit as LengthPercentageUnit)
+    }
+  }
+
+  return new LengthPercentageParser(intersection, options)
+} as LengthPercentageConstructor['subset']
+
+export { length }
