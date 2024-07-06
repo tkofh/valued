@@ -124,13 +124,13 @@ type LengthPercentageConstructor = {
   ): LengthPercentageParser<ReadonlySet<Units[number]>>
 }
 
-const length = function length(
+const lengthPercentage = function lengthPercentage(
   options?: LengthPercentageOptions,
 ): LengthPercentageParser<LengthPercentageUnits> {
   return new LengthPercentageParser(lengthPercentageUnits, options)
 } as LengthPercentageConstructor
 
-length.subset = function lengthSubset<
+lengthPercentage.subset = function lengthPercentageSubset<
   const Units extends ReadonlyArray<string>,
 >(
   units: Units,
@@ -146,4 +146,4 @@ length.subset = function lengthSubset<
   return new LengthPercentageParser(intersection, options)
 } as LengthPercentageConstructor['subset']
 
-export { length }
+export { lengthPercentage }

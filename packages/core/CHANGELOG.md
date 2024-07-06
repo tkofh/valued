@@ -1,5 +1,14 @@
 # valued
 
+## 0.3.0
+
+### Minor Changes
+
+- 2e45fba: added a `keywords` shortcut to improve authoring and performance of multiple keywords in a `oneOf()` combinator
+- c980304: add `normalized` to `AngleValue` so that angle calculations can be avoided
+- d870bc5: add `length.subset()` which takes an array of `LengthUnit`s (but does not need to be the complete list). this helps focus on using "sane" units for different scenarios in which `<length>` applies
+- 79a934e: all parsers now have input types, for giving type information about which values are acceptable to the parser.
+
 ## 0.2.0
 
 ### Minor Changes
