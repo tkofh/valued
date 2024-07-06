@@ -3,6 +3,7 @@ import { angle, angleValue } from '../src/data/angle'
 import { color, colorValue } from '../src/data/color'
 import { dimension, dimensionValue } from '../src/data/dimension'
 import { keyword, keywordValue } from '../src/data/keyword'
+import { length, lengthValue } from '../src/data/length'
 import { lengthPercentageValue } from '../src/data/length-percentage'
 import { number, numberValue } from '../src/data/number'
 import { position } from '../src/data/position'
@@ -223,4 +224,88 @@ describe('angle', () => {
       angleValue(90, 'deg').normalized,
     )
   })
+})
+
+describe('length', () => {
+  const validCases = [
+    ['10px', lengthValue(10, 'px')],
+    ['10rem', lengthValue(10, 'rem')],
+    ['10em', lengthValue(10, 'em')],
+    ['10ex', lengthValue(10, 'ex')],
+    ['10ic', lengthValue(10, 'ic')],
+    ['10lh', lengthValue(10, 'lh')],
+    ['10rcap', lengthValue(10, 'rcap')],
+    ['10rch', lengthValue(10, 'rch')],
+    ['10rem', lengthValue(10, 'rem')],
+    ['10rex', lengthValue(10, 'rex')],
+    ['10ric', lengthValue(10, 'ric')],
+    ['10rlh', lengthValue(10, 'rlh')],
+    ['10vh', lengthValue(10, 'vh')],
+    ['10svh', lengthValue(10, 'svh')],
+    ['10lhv', lengthValue(10, 'lhv')],
+    ['10dvh', lengthValue(10, 'dvh')],
+    ['10vw', lengthValue(10, 'vw')],
+    ['10svw', lengthValue(10, 'svw')],
+    ['10lvw', lengthValue(10, 'lvw')],
+    ['10dvw', lengthValue(10, 'dvw')],
+    ['10vmin', lengthValue(10, 'vmin')],
+    ['10svmin', lengthValue(10, 'svmin')],
+    ['10lvmin', lengthValue(10, 'lvmin')],
+    ['10dvmin', lengthValue(10, 'dvmin')],
+    ['10vmax', lengthValue(10, 'vmax')],
+    ['10svmax', lengthValue(10, 'svmax')],
+    ['10lvmax', lengthValue(10, 'lvmax')],
+    ['10dvmax', lengthValue(10, 'dvmax')],
+    ['10vb', lengthValue(10, 'vb')],
+    ['10svb', lengthValue(10, 'svb')],
+    ['10lvb', lengthValue(10, 'lvb')],
+    ['10dvb', lengthValue(10, 'dvb')],
+    ['10vi', lengthValue(10, 'vi')],
+    ['10svi', lengthValue(10, 'svi')],
+    ['10lvi', lengthValue(10, 'lvi')],
+    ['10dvi', lengthValue(10, 'dvi')],
+    ['10cqw', lengthValue(10, 'cqw')],
+    ['10cqh', lengthValue(10, 'cqh')],
+    ['10cqi', lengthValue(10, 'cqi')],
+    ['10cqb', lengthValue(10, 'cqb')],
+    ['10cqmin', lengthValue(10, 'cqmin')],
+    ['10cqmax', lengthValue(10, 'cqmax')],
+    ['10px', lengthValue(10, 'px')],
+    ['10cm', lengthValue(10, 'cm')],
+    ['10mm', lengthValue(10, 'mm')],
+    ['10Q', lengthValue(10, 'Q')],
+    ['10in', lengthValue(10, 'in')],
+    ['10pc', lengthValue(10, 'pc')],
+    ['10pt', lengthValue(10, 'pt')],
+  ] as const
+
+  for (const [input, output] of validCases) {
+    const parser = length()
+    test(`treats \`${input}\` as valid`, () => {
+      expect(parse(input, parser)).toEqual(valid(output))
+    })
+  }
+})
+
+describe('length.subset', () => {
+  const validCases = [
+    ['10px', lengthValue(10, 'px')],
+    ['10rem', lengthValue(10, 'rem')],
+  ] as const
+
+  const parser = length.subset(['px', 'rem'])
+
+  for (const [input, output] of validCases) {
+    test(`treats \`${input}\` as valid`, () => {
+      expect(parse(input, parser)).toEqual(valid(output))
+    })
+  }
+
+  const invalidCases = ['10em', '10ex'] as const
+
+  for (const input of invalidCases) {
+    test(`treats \`${input}\` as invalid`, () => {
+      expect(parse(input, parser)).toEqual(invalid())
+    })
+  }
 })

@@ -63,41 +63,79 @@ const lengthUnits = new Set([
 type LengthUnits = typeof lengthUnits
 type LengthUnit = ValuesOfSet<LengthUnits>
 
-export type LengthInput = `${number}${LengthUnit}`
+export type LengthInput<Unit extends string> = `${number}${Unit}`
 
-class LengthValue implements InternalDimensionValue<LengthUnit> {
+class LengthValue<Unit extends LengthUnit>
+  implements InternalDimensionValue<Unit>
+{
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number
-  readonly unit: LengthUnit
+  readonly unit: Unit
 
-  constructor(value: number, unit: LengthUnit) {
+  constructor(value: number, unit: Unit) {
     this.value = value
     this.unit = unit
   }
 }
 
-export function lengthValue(value: number, unit: LengthUnit): LengthValue {
+export function lengthValue<Unit extends LengthUnit>(
+  value: number,
+  unit: Unit,
+): LengthValue<Unit> {
   return new LengthValue(value, unit)
 }
 
-export function isLengthValue(value: unknown): value is LengthValue {
+export function isLengthValue<Unit extends LengthUnit>(
+  value: unknown,
+): value is LengthValue<Unit> {
   return isRecordOrArray(value) && TypeBrand in value
 }
 
 interface LengthOptions extends InternalDimensionOptions {}
 
-class LengthParser
-  extends InternalDimensionParser<LengthUnits, LengthValue>
-  implements Parser<LengthValue, LengthInput>
+class LengthParser<Units extends ReadonlySet<LengthUnit>>
+  extends InternalDimensionParser<Units, LengthValue<ValuesOfSet<Units>>>
+  implements
+    Parser<LengthValue<ValuesOfSet<Units>>, LengthInput<ValuesOfSet<Units>>>
 {
-  constructor(options?: LengthOptions) {
-    super('length', lengthUnits, lengthValue, options)
+  constructor(units: Units, options?: LengthOptions) {
+    super('length', units, lengthValue, options)
   }
 }
 
 export type { LengthParser, LengthValue }
 
-export function length(options?: LengthOptions): LengthParser {
-  return new LengthParser(options)
+type LengthConstructor = {
+  <const Units extends ReadonlyArray<LengthUnit>>(
+    options?: LengthOptions,
+  ): LengthParser<ReadonlySet<Units[number]>>
+  subset<const Units extends ReadonlyArray<LengthUnit>>(
+    units: Units,
+    options?: LengthOptions,
+  ): LengthParser<ReadonlySet<Units[number]>>
 }
+
+const length = function length(
+  options?: LengthOptions,
+): LengthParser<LengthUnits> {
+  return new LengthParser(lengthUnits, options)
+} as LengthConstructor
+
+length.subset = function lengthSubset<
+  const Units extends ReadonlyArray<string>,
+>(
+  units: Units,
+  options?: LengthOptions,
+): LengthParser<ReadonlySet<Units[number] & LengthUnit>> {
+  const intersection: Set<Units[number] & LengthUnit> = new Set()
+  for (const unit of units) {
+    if (lengthUnits.has(unit as LengthUnit)) {
+      intersection.add(unit as LengthUnit)
+    }
+  }
+
+  return new LengthParser(intersection, options)
+} as LengthConstructor['subset']
+
+export { length }
