@@ -1,24 +1,64 @@
-import type { Parser } from '../parser'
+import {
+  type AnyParser,
+  BaseParser,
+  type Parser,
+  type ParserState,
+  currentState,
+  initialState,
+} from '../parser'
 import type { Token } from '../tokenizer'
+import type { ExtractParserInputs, ExtractParserValues } from './types'
 
-type ExtractParserValues<T extends ReadonlyArray<unknown>> = {
-  [K in keyof T]: T[K] extends Parser<infer U> ? U : never
-}
+type Combinations<T extends ReadonlyArray<string>> = T extends [string]
+  ? T[0]
+  : T extends [string, string]
+    ? `${T[0]} ${T[1]}` | `${T[1]} ${T[0]}`
+    : T extends [string, string, string]
+      ?
+          | `${T[0]} ${T[1]} ${T[2]}`
+          | `${T[0]} ${T[2]} ${T[1]}`
+          | `${T[1]} ${T[2]} ${T[0]}`
+          | `${T[1]} ${T[0]} ${T[2]}`
+          | `${T[2]} ${T[0]} ${T[1]}`
+          | `${T[2]} ${T[1]} ${T[0]}`
+      : T extends [string, string, string, string]
+        ?
+            | `${T[0]} ${Combinations<[T[1], T[2], T[3]]>}`
+            | `${T[1]} ${Combinations<[T[0], T[2], T[3]]>}`
+            | `${T[2]} ${Combinations<[T[0], T[1], T[3]]>}`
+            | `${T[3]} ${Combinations<[T[0], T[1], T[2]]>}`
+        : T extends [string, string, string, string, string]
+          ?
+              | `${T[0]} ${Combinations<[T[1], T[2], T[3], T[4]]>}`
+              | `${T[1]} ${Combinations<[T[0], T[2], T[3], T[4]]>}`
+              | `${T[2]} ${Combinations<[T[0], T[1], T[3], T[4]]>}`
+              | `${T[3]} ${Combinations<[T[0], T[1], T[2], T[4]]>}`
+              | `${T[4]} ${Combinations<[T[0], T[1], T[2], T[3]]>}`
+          : string
 
-class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
-  implements Parser<ExtractParserValues<Parsers>>
+export type AllOfInput<Parsers extends ReadonlyArray<AnyParser>> = Combinations<
+  ExtractParserInputs<Parsers>
+>
+
+class AllOf<
+    Parsers extends ReadonlyArray<AnyParser>,
+    Input extends string = AllOfInput<Parsers>,
+  >
+  extends BaseParser<ExtractParserValues<Parsers>, Input>
+  implements Parser<ExtractParserValues<Parsers>, Input>
 {
-  readonly parsers!: ReadonlySet<Parser<unknown>>
+  readonly parsers!: ReadonlySet<AnyParser>
 
   #candidates: Set<Parsers[number]> = new Set()
   #satisfied: Set<Parsers[number]> = new Set()
 
   constructor(parsers: Parsers) {
+    super()
     if (parsers.length === 0) {
       throw new TypeError('allOf() parser must have at least one parser')
     }
 
-    const storage = new Set<Parser<unknown>>()
+    const storage = new Set<AnyParser>()
 
     for (const parser of parsers) {
       if (parser instanceof AllOf) {
@@ -33,7 +73,7 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     this.parsers = storage
   }
 
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
+  satisfied(state: ParserState): boolean {
     for (const parser of this.parsers) {
       if (!parser.satisfied(state)) {
         return false
@@ -53,8 +93,8 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     return result
   }
 
-  check(token: Token, state: 'current' | 'initial'): boolean {
-    if (this.#candidates.size > 0 && state === 'current') {
+  check(token: Token, state: ParserState): boolean {
+    if (this.#candidates.size > 0 && state === currentState) {
       return this.#checkCandidates(token)
     }
 
@@ -86,7 +126,7 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     }
   }
 
-  toString(): string {
+  override toString(): string {
     return Array.from(this.parsers, (parser) => parser.toString()).join(' && ')
   }
 
@@ -121,18 +161,18 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 
   #applyToken(token: Token, operation: 'feed' | 'check') {
-    const rejected = new Set<Parser<unknown>>()
-    const satisfied = new Set<Parser<unknown>>()
+    const rejected = new Set<AnyParser>()
+    const satisfied = new Set<AnyParser>()
     for (const parser of this.#candidates) {
       let result: boolean
       if (operation === 'feed') {
         result = parser.feed(token)
       } else {
-        result = parser.check(token, 'current')
+        result = parser.check(token, currentState)
       }
 
       if (result === false) {
-        if (parser.satisfied()) {
+        if (parser.satisfied(currentState)) {
           satisfied.add(parser)
         }
 
@@ -143,10 +183,10 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     return { rejected, satisfied }
   }
 
-  #getHotswapCandidates(token: Token, satisfied: Set<Parser<unknown>>) {
+  #getHotswapCandidates(token: Token, satisfied: Set<AnyParser>) {
     const initialCandidates = this.#findInitialCandidates(token)
 
-    let satisfiedCandidate: Parser<unknown> | null = null
+    let satisfiedCandidate: AnyParser | null = null
     for (const parser of satisfied) {
       if (initialCandidates.has(parser) && initialCandidates.size > 1) {
         initialCandidates.delete(parser)
@@ -169,8 +209,8 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
 
   #applyHotswap(
     token: Token,
-    satisfiedCandidate: Parser<unknown>,
-    initialCandidates: Set<Parser<unknown>>,
+    satisfiedCandidate: AnyParser,
+    initialCandidates: Set<AnyParser>,
   ) {
     this.#satisfied.add(satisfiedCandidate)
 
@@ -185,10 +225,10 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     this.#candidates = initialCandidates
   }
 
-  #findInitialCandidates(token: Token): Set<Parser<unknown>> {
-    const candidates = new Set<Parser<unknown>>()
+  #findInitialCandidates(token: Token): Set<AnyParser> {
+    const candidates = new Set<AnyParser>()
     for (const parser of this.parsers) {
-      if (parser.check(token, 'initial') && !this.#satisfied.has(parser)) {
+      if (parser.check(token, initialState) && !this.#satisfied.has(parser)) {
         candidates.add(parser)
       }
     }
@@ -227,9 +267,9 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     return this.#getHotswapCandidates(token, satisfied) !== false
   }
 
-  #checkAll(token: Token, state: 'current' | 'initial'): boolean {
+  #checkAll(token: Token, state: ParserState): boolean {
     for (const parser of this.parsers) {
-      if (this.#satisfied.has(parser) && state === 'current') {
+      if (this.#satisfied.has(parser) && state === currentState) {
         continue
       }
 
@@ -242,8 +282,29 @@ class AllOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 }
 
-export function allOf<const Parsers extends ReadonlyArray<Parser<unknown>>>(
-  parsers: Parsers,
-): AllOf<Parsers> {
-  return new AllOf(parsers)
+export type { AllOf }
+
+type AllOfConstructor = {
+  <const Parsers extends ReadonlyArray<AnyParser>>(
+    parsers: Parsers,
+  ): AllOf<Parsers>
+  withInput<Input extends string>(): <
+    const Parsers extends ReadonlyArray<AnyParser>,
+  >(
+    parsers: Parsers,
+  ) => AllOf<Parsers, Input>
 }
+
+const allOf: AllOfConstructor = function allOfg<
+  const Parsers extends ReadonlyArray<AnyParser>,
+>(parsers: Parsers): AllOf<Parsers> {
+  return new AllOf(parsers)
+} as AllOfConstructor
+
+allOf.withInput = (<Input extends string>() =>
+  <const Parsers extends ReadonlyArray<AnyParser>>(
+    parsers: Parsers,
+  ): AllOf<Parsers, Input> =>
+    new AllOf(parsers)) as AllOfConstructor['withInput']
+
+export { allOf }

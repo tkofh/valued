@@ -64,6 +64,8 @@ const lengthPercentageUnits = new Set([
 type LengthPercentageUnits = typeof lengthPercentageUnits
 type LengthPercentageUnit = ValuesOfSet<LengthPercentageUnits>
 
+export type LengthPercentageInput = `${number}${LengthPercentageUnit}`
+
 class LengthPercentageValue
   implements InternalDimensionValue<LengthPercentageUnit>
 {
@@ -95,7 +97,7 @@ interface LengthPercentageOptions extends InternalDimensionOptions {}
 
 class LengthPercentageParser
   extends InternalDimensionParser<LengthPercentageUnits, LengthPercentageValue>
-  implements Parser<LengthPercentageValue>
+  implements Parser<LengthPercentageValue, LengthPercentageInput>
 {
   constructor(options?: LengthPercentageOptions) {
     super(

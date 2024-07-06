@@ -20,6 +20,8 @@ const angleUnits = new Set(angleDenominators.keys())
 type AngleUnits = typeof angleUnits
 export type AngleUnit = ValuesOfSet<AngleUnits>
 
+export type AngleInput = `${number}${AngleUnit}`
+
 class AngleValue implements InternalDimensionValue<AngleUnit> {
   readonly [TypeBrand] = TypeBrand
 
@@ -53,7 +55,7 @@ interface AngleOptions extends InternalDimensionOptions {}
 
 class AngleParser
   extends InternalDimensionParser<AngleUnits, AngleValue>
-  implements Parser<AngleValue>
+  implements Parser<AngleValue, AngleInput>
 {
   constructor(options?: AngleOptions) {
     super('angle', angleUnits, angleValue, options)

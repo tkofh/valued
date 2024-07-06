@@ -1,5 +1,10 @@
 import Color from 'colorjs.io'
-import type { Parser } from '../parser'
+import {
+  BaseParser,
+  type Parser,
+  type ParserState,
+  currentState,
+} from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
 
@@ -27,11 +32,14 @@ export function isColorValue(value: unknown): value is ColorValue {
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class ColorParser implements Parser<ColorValue> {
+class ColorParser
+  extends BaseParser<ColorValue, string>
+  implements Parser<ColorValue, string>
+{
   #value: ColorValue | null = null
 
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
-    return state === 'current' && this.#value !== null
+  satisfied(state: ParserState): boolean {
+    return state === currentState && this.#value !== null
   }
 
   feed(token: Token): boolean {
@@ -47,8 +55,8 @@ class ColorParser implements Parser<ColorValue> {
     return false
   }
 
-  check(token: Token, state: 'current' | 'initial'): boolean {
-    if (this.#value !== null && state === 'current') {
+  check(token: Token, state: ParserState): boolean {
+    if (this.#value !== null && state === currentState) {
       return false
     }
 
@@ -67,7 +75,7 @@ class ColorParser implements Parser<ColorValue> {
     this.#value = null
   }
 
-  toString(): string {
+  override toString(): string {
     return '<color>'
   }
 }

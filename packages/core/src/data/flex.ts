@@ -8,9 +8,11 @@ import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/flex')
 
-const flexUnits = new Set(['flex'] as const)
+const flexUnits = new Set(['fr'] as const)
 type FlexUnits = typeof flexUnits
 type FlexUnit = ValuesOfSet<FlexUnits>
+
+export type FlexInput = `${number}${FlexUnit}`
 
 class FlexValue implements InternalDimensionValue<FlexUnit> {
   readonly [TypeBrand] = TypeBrand
@@ -34,7 +36,7 @@ export function isFlexValue(value: unknown): value is FlexValue {
 
 class FlexParser
   extends InternalDimensionParser<FlexUnits, FlexValue>
-  implements Parser<FlexValue>
+  implements Parser<FlexValue, FlexInput>
 {
   constructor() {
     super('flex', flexUnits, flexValue)

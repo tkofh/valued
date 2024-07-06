@@ -9,9 +9,11 @@ import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/frequency')
 
-const frequencyUnits = new Set(['Hz', 'kHz'] as const)
+const frequencyUnits = new Set(['Hz', 'kHz', 'hz', 'khz'] as const)
 type FrequencyUnits = typeof frequencyUnits
 type FrequencyUnit = ValuesOfSet<FrequencyUnits>
+
+export type FrequencyInput = `${number}${FrequencyUnit}`
 
 class FrequencyValue implements InternalDimensionValue<FrequencyUnit> {
   readonly [TypeBrand] = TypeBrand
@@ -40,7 +42,7 @@ interface FrequencyOptions extends InternalDimensionOptions {}
 
 class FrequencyParser
   extends InternalDimensionParser<FrequencyUnits, FrequencyValue>
-  implements Parser<FrequencyValue>
+  implements Parser<FrequencyValue, FrequencyInput>
 {
   constructor(options?: FrequencyOptions) {
     super('frequency', frequencyUnits, frequencyValue, options)

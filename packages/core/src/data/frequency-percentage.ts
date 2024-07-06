@@ -9,9 +9,17 @@ import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/frequencyPercentage')
 
-const frequencyPercentageUnits = new Set(['Hz', 'kHz'] as const)
+const frequencyPercentageUnits = new Set([
+  'Hz',
+  'kHz',
+  'hz',
+  'khz',
+  '%',
+] as const)
 type FrequencyPercentageUnits = typeof frequencyPercentageUnits
 type FrequencyPercentageUnit = ValuesOfSet<FrequencyPercentageUnits>
+
+export type FrequencyPercentageInput = `${number}${FrequencyPercentageUnit}`
 
 class FrequencyPercentageValue
   implements InternalDimensionValue<FrequencyPercentageUnit>
@@ -47,7 +55,7 @@ class FrequencyPercentageParser
     FrequencyPercentageUnits,
     FrequencyPercentageValue
   >
-  implements Parser<FrequencyPercentageValue>
+  implements Parser<FrequencyPercentageValue, FrequencyPercentageInput>
 {
   constructor(options?: FrequencyPercentageOptions) {
     super(

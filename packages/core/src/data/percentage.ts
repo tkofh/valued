@@ -13,6 +13,8 @@ const percentageUnits = new Set(['%'] as const)
 type PercentageUnits = typeof percentageUnits
 type PercentageUnit = ValuesOfSet<PercentageUnits>
 
+export type PercentageInput = `${number}${PercentageUnit}`
+
 class PercentageValue implements InternalDimensionValue<PercentageUnit> {
   readonly [TypeBrand] = TypeBrand
 
@@ -37,7 +39,7 @@ interface PercentageOptions extends InternalDimensionOptions {}
 
 class PercentageParser
   extends InternalDimensionParser<PercentageUnits, PercentageValue>
-  implements Parser<PercentageValue>
+  implements Parser<PercentageValue, PercentageInput>
 {
   constructor(options?: PercentageOptions) {
     super('percentage', percentageUnits, percentageValue, options)

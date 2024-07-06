@@ -1,4 +1,10 @@
-import type { Parser } from '../parser'
+import {
+  BaseParser,
+  type Parser,
+  type ParserState,
+  currentState,
+  initialState,
+} from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
 
@@ -27,18 +33,20 @@ export function isKeywordValue<Value extends string>(
 }
 
 class KeywordParser<Value extends string>
-  implements Parser<KeywordValue<Value>>
+  extends BaseParser<KeywordValue<Value>, Value>
+  implements Parser<KeywordValue<Value>, Value>
 {
   readonly keyword: string
 
   #value: KeywordValue<Value> | null = null
 
   constructor(keyword: Value) {
+    super()
     this.keyword = keyword
   }
 
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
-    return state === 'current' && this.#value !== null
+  satisfied(state: ParserState): boolean {
+    return state === currentState && this.#value !== null
   }
 
   feed(token: Token): boolean {
@@ -53,11 +61,11 @@ class KeywordParser<Value extends string>
     return false
   }
 
-  check(token: Token, state: 'initial' | 'current'): boolean {
+  check(token: Token, state: ParserState): boolean {
     return (
       token.type === 'literal' &&
       token.value === this.keyword &&
-      (state === 'initial' || this.#value === null)
+      (state === initialState || this.#value === null)
     )
   }
 
@@ -73,7 +81,7 @@ class KeywordParser<Value extends string>
     this.#value = null
   }
 
-  toString(): string {
+  override toString(): string {
     return this.keyword
   }
 }

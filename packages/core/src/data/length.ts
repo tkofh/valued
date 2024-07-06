@@ -63,6 +63,8 @@ const lengthUnits = new Set([
 type LengthUnits = typeof lengthUnits
 type LengthUnit = ValuesOfSet<LengthUnits>
 
+export type LengthInput = `${number}${LengthUnit}`
+
 class LengthValue implements InternalDimensionValue<LengthUnit> {
   readonly [TypeBrand] = TypeBrand
 
@@ -87,7 +89,7 @@ interface LengthOptions extends InternalDimensionOptions {}
 
 class LengthParser
   extends InternalDimensionParser<LengthUnits, LengthValue>
-  implements Parser<LengthValue>
+  implements Parser<LengthValue, LengthInput>
 {
   constructor(options?: LengthOptions) {
     super('length', lengthUnits, lengthValue, options)

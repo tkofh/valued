@@ -1,9 +1,10 @@
 import { InternalNumberParser } from '../internal/number'
 import type { Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
 
 const TypeBrand: unique symbol = Symbol('data/integer')
+
+export type IntegerInput = `${number}`
 
 class IntegerValue {
   readonly [TypeBrand] = TypeBrand
@@ -28,67 +29,24 @@ interface IntegerOptions {
   max?: number | false | null | undefined
 }
 
-class IntegerParser implements Parser<IntegerValue> {
-  #value: IntegerValue | null = null
-  #parser: InternalNumberParser
-
+class IntegerParser
+  extends InternalNumberParser<IntegerValue, IntegerInput>
+  implements Parser<IntegerValue, IntegerInput>
+{
   constructor(options?: IntegerOptions) {
-    this.#parser = new InternalNumberParser(
-      options?.min ?? false,
-      options?.max ?? false,
+    super(
+      options?.min == null || options.min === false
+        ? Number.NEGATIVE_INFINITY
+        : options.min,
+      options?.max == null || options.max === false
+        ? Number.POSITIVE_INFINITY
+        : options.max,
+      integerValue,
     )
   }
 
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
-    return state === 'current' && this.#value !== null
-  }
-
-  feed(token: Token): boolean {
-    if (this.#value !== null) {
-      return false
-    }
-
-    if (token.type !== 'literal') {
-      return false
-    }
-
-    const value = this.#parser.parse(token.value)
-
-    if (value !== false && Math.round(value) === value) {
-      this.#value = integerValue(value)
-      return true
-    }
-
-    return false
-  }
-
-  check(token: Token, state: 'current' | 'initial'): boolean {
-    if (this.#value !== null && state === 'current') {
-      return false
-    }
-
-    if (token.type !== 'literal') {
-      return false
-    }
-
-    const value = this.#parser.parse(token.value)
-    return value !== false && Math.round(value) === value
-  }
-
-  read(): IntegerValue | undefined {
-    if (this.#value === null) {
-      return undefined
-    }
-
-    return this.#value
-  }
-
-  reset(): void {
-    this.#value = null
-  }
-
-  toString(): string {
-    return this.#parser.toString()
+  protected override checkNumberValue(value: number): boolean {
+    return ~~value === value
   }
 }
 

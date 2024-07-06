@@ -1,12 +1,163 @@
-import type { Parser, ParserValue } from '../parser'
+import {
+  type AnyParser,
+  BaseParser,
+  type Parser,
+  type ParserInput,
+  type ParserState,
+  type ParserValue,
+  currentState,
+  initialState,
+} from '../parser'
 import type { Token } from '../tokenizer'
 
 function isComma(token: Token): boolean {
   return token.type === 'literal' && token.value === ','
 }
 
-export class Range<P extends Parser<unknown>>
-  implements Parser<ReadonlyArray<ParserValue<P>>>
+type Repeat<T extends string, S extends string, N extends number> = N extends 0
+  ? ''
+  : N extends 1
+    ? T
+    : N extends 2
+      ? `${T}${S}${T}`
+      : N extends 3
+        ? `${T}${S}${T}${S}${T}`
+        : N extends 4
+          ? `${T}${S}${T}${S}${T}${S}${T}`
+          : N extends 5
+            ? `${T}${S}${T}${S}${T}${S}${T}${S}${T}`
+            : N extends 6
+              ? `${T}${S}${T}${S}${T}${S}${T}${S}${T}${S}${T}`
+              : N extends 7
+                ? `${T}${S}${T}${S}${T}${S}${T}${S}${T}${S}${T}${S}${T}`
+                : N extends 8
+                  ? `${T}${S}${T}${S}${T}${S}${T}${S}${T}${S}${T}${S}${T}${S}${T}`
+                  : string
+
+type Integer = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+
+type NumberRange<Start extends Integer, End extends Integer> = [
+  [
+    0,
+    0 | 1,
+    0 | 1 | 2,
+    0 | 1 | 2 | 3,
+    0 | 1 | 2 | 3 | 4,
+    0 | 1 | 2 | 3 | 4 | 5,
+    0 | 1 | 2 | 3 | 4 | 5 | 6,
+    0 | 1 | 2 | 3 | 4 | 5 | 6 | 7,
+    0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8,
+  ],
+  [
+    0 | 1,
+    1,
+    1 | 2,
+    1 | 2 | 3,
+    1 | 2 | 3 | 4,
+    1 | 2 | 3 | 4 | 5,
+    1 | 2 | 3 | 4 | 5 | 6,
+    1 | 2 | 3 | 4 | 5 | 6 | 7,
+    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8,
+  ],
+  [
+    0 | 1 | 2,
+    1 | 2,
+    2,
+    2 | 3,
+    2 | 3 | 4,
+    2 | 3 | 4 | 5,
+    2 | 3 | 4 | 5 | 6,
+    2 | 3 | 4 | 5 | 6 | 7,
+    2 | 3 | 4 | 5 | 6 | 7 | 8,
+  ],
+  [
+    0 | 1 | 2 | 3,
+    1 | 2 | 3,
+    2 | 3,
+    3,
+    3 | 4,
+    3 | 4 | 5,
+    3 | 4 | 5 | 6,
+    3 | 4 | 5 | 6 | 7,
+    3 | 4 | 5 | 6 | 7 | 8,
+  ],
+  [
+    0 | 1 | 2 | 3 | 4,
+    1 | 2 | 3 | 4,
+    2 | 3 | 4,
+    3 | 4,
+    4,
+    4 | 5,
+    4 | 5 | 6,
+    4 | 5 | 6 | 7,
+    4 | 5 | 6 | 7 | 8,
+  ],
+  [
+    0 | 1 | 2 | 3 | 4 | 5,
+    1 | 2 | 3 | 4 | 5,
+    2 | 3 | 4 | 5,
+    3 | 4 | 5,
+    4 | 5,
+    5,
+    5 | 6,
+    5 | 6 | 7,
+    5 | 6 | 7 | 8,
+  ],
+  [
+    0 | 1 | 2 | 3 | 4 | 5 | 6,
+    1 | 2 | 3 | 4 | 5 | 6,
+    2 | 3 | 4 | 5 | 6,
+    3 | 4 | 5 | 6,
+    4 | 5 | 6,
+    5 | 6,
+    6,
+    6 | 7,
+    6 | 7 | 8,
+  ],
+  [
+    0 | 1 | 2 | 3 | 4 | 5 | 6 | 7,
+    1 | 2 | 3 | 4 | 5 | 6 | 7,
+    2 | 3 | 4 | 5 | 6 | 7,
+    3 | 4 | 5 | 6 | 7,
+    4 | 5 | 6 | 7,
+    5 | 6 | 7,
+    6 | 7,
+    7,
+    7 | 8,
+  ],
+  [
+    0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8,
+    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8,
+    2 | 3 | 4 | 5 | 6 | 7 | 8,
+    3 | 4 | 5 | 6 | 7 | 8,
+    4 | 5 | 6 | 7 | 8,
+    5 | 6 | 7 | 8,
+    6 | 7 | 8,
+    7 | 8,
+    8,
+  ],
+][Start][End]
+
+export type RangeInput<
+  P extends AnyParser,
+  C extends boolean,
+  Min extends number,
+  Max extends number,
+> = Min extends Integer
+  ? Max extends Integer
+    ? Repeat<ParserInput<P>, C extends true ? ', ' : ' ', NumberRange<Min, Max>>
+    : string
+  : string
+
+export class Range<
+    P extends AnyParser,
+    CommaSeparated extends boolean,
+    Min extends number,
+    Max extends number,
+    Input extends string = RangeInput<P, CommaSeparated, Min, Max>,
+  >
+  extends BaseParser<ReadonlyArray<ParserValue<P>>, Input>
+  implements Parser<ReadonlyArray<ParserValue<P>>, Input>
 {
   readonly parser: P
   readonly minLength: number
@@ -21,14 +172,16 @@ export class Range<P extends Parser<unknown>>
     parser: P,
     minLength: number,
     maxLength: number | false,
-    commaSeparated: boolean,
+    commaSeparated: CommaSeparated,
   ) {
+    super()
+
     if (maxLength !== false && minLength > maxLength) {
-      throw new TypeError('minLength must be less than or equal to maxLength')
+      throw new RangeError('minLength must be less than or equal to maxLength')
     }
 
     if (commaSeparated && minLength === 0) {
-      throw new TypeError(
+      throw new RangeError(
         'minLength must be greater than 0 when commaSeparated is true',
       )
     }
@@ -39,17 +192,17 @@ export class Range<P extends Parser<unknown>>
     this.commaSeparated = commaSeparated
   }
 
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
-    if (state === 'initial') {
+  satisfied(state: ParserState): boolean {
+    if (state === initialState) {
       return this.minLength === 0
     }
 
-    if (this.#hasConsumed && !this.parser.satisfied()) {
+    if (this.#hasConsumed && !this.parser.satisfied(currentState)) {
       return false
     }
 
     let satisfied = this.#value.length
-    if (this.parser.satisfied()) {
+    if (this.parser.satisfied(currentState)) {
       satisfied++
     }
 
@@ -71,8 +224,8 @@ export class Range<P extends Parser<unknown>>
       return true
     }
 
-    if (this.parser.satisfied()) {
-      const wouldConsume = this.parser.check(token, 'initial')
+    if (this.parser.satisfied(currentState)) {
+      const wouldConsume = this.parser.check(token, initialState)
 
       if (wouldConsume) {
         this.#value.push(this.parser.read() as ParserValue<P>)
@@ -87,31 +240,31 @@ export class Range<P extends Parser<unknown>>
     return false
   }
 
-  check(token: Token, state: 'initial' | 'current'): boolean {
-    if (state === 'initial') {
+  check(token: Token, state: ParserState): boolean {
+    if (state === initialState) {
       if (!this.#canConsumeInitially(token)) {
         return false
       }
 
-      return this.parser.check(token, 'initial')
+      return this.parser.check(token, initialState)
     }
 
     if (!this.#canConsumeCurrently(token)) {
       return false
     }
 
-    const current = this.parser.check(token, 'current')
+    const current = this.parser.check(token, currentState)
     if (current) {
       return true
     }
 
-    const initial = this.parser.check(token, 'initial')
+    const initial = this.parser.check(token, initialState)
 
-    return initial && this.parser.satisfied()
+    return initial && this.parser.satisfied(currentState)
   }
 
   read(): ReadonlyArray<ParserValue<P>> | undefined {
-    if (!this.parser.satisfied() && this.#hasConsumed) {
+    if (!this.parser.satisfied(currentState) && this.#hasConsumed) {
       return undefined
     }
 
@@ -135,7 +288,7 @@ export class Range<P extends Parser<unknown>>
     this.#hasConsumed = false
   }
 
-  toString(): string {
+  override toString(): string {
     let modifier =
       this.maxLength !== false
         ? this.minLength === this.maxLength

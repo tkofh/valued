@@ -1,7 +1,15 @@
 import { Range } from '../internal/range'
-import type { Parser } from '../parser'
+import type { AnyParser } from '../parser'
 
-class Between<P extends Parser<unknown>> extends Range<P> {}
+class Between<
+  P extends AnyParser,
+  Options extends BetweenOptions,
+> extends Range<
+  P,
+  Options['commaSeparated'] extends boolean ? Options['commaSeparated'] : false,
+  Options['minLength'],
+  Options['maxLength']
+> {}
 
 interface BetweenOptions {
   minLength: number
@@ -9,14 +17,14 @@ interface BetweenOptions {
   commaSeparated?: boolean
 }
 
-export function between<P extends Parser<unknown>>(
-  parser: P,
-  options: BetweenOptions,
-): Between<P> {
+export function between<
+  P extends AnyParser,
+  const Options extends BetweenOptions,
+>(parser: P, options: Options): Between<P, Options> {
   return new Between(
     parser,
     options.minLength,
     options.maxLength,
-    options.commaSeparated ?? false,
+    (options.commaSeparated ?? false) as never,
   )
 }

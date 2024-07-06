@@ -12,6 +12,8 @@ type ValuesOfSet<T extends ReadonlySet<unknown>> = T extends ReadonlySet<
   ? U
   : never
 
+export type DimensionInput<Unit extends string> = `${number}${Unit}`
+
 const TypeBrand: unique symbol = Symbol('data/dimension')
 
 class DimensionValue<Unit extends string>
@@ -45,7 +47,11 @@ interface DimensionOptions extends InternalDimensionOptions {}
 
 class DimensionParser<Units extends ReadonlySet<string>>
   extends InternalDimensionParser<Units, DimensionValue<ValuesOfSet<Units>>>
-  implements Parser<DimensionValue<ValuesOfSet<Units>>>
+  implements
+    Parser<
+      DimensionValue<ValuesOfSet<Units>>,
+      DimensionInput<ValuesOfSet<Units>>
+    >
 {
   constructor(units: Units, options?: DimensionOptions) {
     super('dimension', units, dimensionValue, options)

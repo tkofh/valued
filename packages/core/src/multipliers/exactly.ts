@@ -1,8 +1,13 @@
 import { Range } from '../internal/range'
-import type { Parser } from '../parser'
+import type { AnyParser } from '../parser'
 
-class Exactly<P extends Parser<unknown>> extends Range<P> {
-  constructor(parser: P, count: number) {
+class Exactly<P extends AnyParser, Count extends number> extends Range<
+  P,
+  false,
+  Count,
+  Count
+> {
+  constructor(parser: P, count: Count) {
     if (count < 1) {
       throw new TypeError('exactly() parser must have a count of at least 1')
     }
@@ -10,9 +15,9 @@ class Exactly<P extends Parser<unknown>> extends Range<P> {
   }
 }
 
-export function exactly<P extends Parser<unknown>>(
+export function exactly<P extends AnyParser, const Count extends number>(
   parser: P,
-  count: number,
-): Exactly<P> {
+  count: Count,
+): Exactly<P, Count> {
   return new Exactly(parser, count)
 }

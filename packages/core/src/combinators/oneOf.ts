@@ -1,14 +1,31 @@
-import type { Parser, ParserValue } from '../parser'
+import {
+  type AnyParser,
+  BaseParser,
+  type Parser,
+  type ParserInput,
+  type ParserState,
+  type ParserValue,
+  currentState,
+} from '../parser'
 import type { Token } from '../tokenizer'
 
-class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
-  implements Parser<ParserValue<Parsers[number]>>
-{
-  readonly parsers: ReadonlySet<Parser<unknown>>
+export type OneOfInput<Parsers extends ReadonlyArray<AnyParser>> = ParserInput<
+  Parsers[number]
+>
 
-  #candidates: Set<Parser<unknown>> = new Set()
+class OneOf<
+    Parsers extends ReadonlyArray<AnyParser>,
+    Input extends string = OneOfInput<Parsers>,
+  >
+  extends BaseParser<ParserValue<Parsers[number]>, Input>
+  implements Parser<ParserValue<Parsers[number]>, Input>
+{
+  readonly parsers: ReadonlySet<AnyParser>
+
+  #candidates: Set<AnyParser> = new Set()
 
   constructor(parsers: Parsers) {
+    super()
     if (parsers.length === 0) {
       throw new TypeError('oneOf() parser must have at least one parser')
     }
@@ -16,7 +33,7 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     this.parsers = new Set(parsers)
   }
 
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
+  satisfied(state: ParserState): boolean {
     for (const parser of this.parsers) {
       if (parser.satisfied(state)) {
         return true
@@ -33,8 +50,8 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     return this.#feedAll(token)
   }
 
-  check(token: Token, state: 'current' | 'initial'): boolean {
-    if (this.#candidates.size > 0 && state === 'current') {
+  check(token: Token, state: ParserState): boolean {
+    if (this.#candidates.size > 0 && state === currentState) {
       return this.#checkCandidates(token)
     }
 
@@ -53,12 +70,12 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     }
   }
 
-  toString(): string {
+  override toString(): string {
     return Array.from(this.parsers, (parser) => parser.toString()).join(' | ')
   }
 
   #feedCandidates(token: Token): boolean {
-    const consumed = new Set<Parser<unknown>>()
+    const consumed = new Set<AnyParser>()
     for (const parser of this.#candidates) {
       if (parser.feed(token)) {
         consumed.add(parser)
@@ -95,7 +112,7 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
 
   #checkCandidates(token: Token): boolean {
     for (const parser of this.#candidates) {
-      if (parser.check(token, 'current')) {
+      if (parser.check(token, currentState)) {
         return true
       }
     }
@@ -103,7 +120,7 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
     return false
   }
 
-  #checkAll(token: Token, state: 'current' | 'initial'): boolean {
+  #checkAll(token: Token, state: ParserState): boolean {
     for (const parser of this.parsers) {
       if (parser.check(token, state)) {
         return true
@@ -154,8 +171,29 @@ class OneOf<Parsers extends ReadonlyArray<Parser<unknown>>>
   }
 }
 
-export function oneOf<const Parsers extends ReadonlyArray<Parser<unknown>>>(
-  parsers: Parsers,
-): OneOf<Parsers> {
-  return new OneOf(parsers)
+export type { OneOf }
+
+type OneOfConstructor = {
+  <const Parsers extends ReadonlyArray<AnyParser>>(
+    parsers: Parsers,
+  ): OneOf<Parsers>
+  withInput<const Input extends string>(): <
+    const Parsers extends ReadonlyArray<AnyParser>,
+  >(
+    parsers: Parsers,
+  ) => OneOf<Parsers, Input>
 }
+
+const oneOf: OneOfConstructor = function oneOf<
+  const Parsers extends ReadonlyArray<AnyParser>,
+>(parsers: Parsers): OneOf<Parsers> {
+  return new OneOf(parsers)
+} as OneOfConstructor
+
+oneOf.withInput = (<Input extends string>() =>
+  <const Parsers extends ReadonlyArray<AnyParser>>(
+    parsers: Parsers,
+  ): OneOf<Parsers, Input> =>
+    new OneOf(parsers)) as OneOfConstructor['withInput']
+
+export { oneOf }

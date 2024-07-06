@@ -1,6 +1,7 @@
-import type { Parser } from '../parser'
+import { type Parser, type ParserState, currentState } from '../parser'
+import { BaseParser } from '../parser'
 import type { Token } from '../tokenizer'
-import { InternalNumberParser } from './number'
+import { parseNumericInput, stringifyNumericParser } from './number'
 
 export type ValuesOfSet<T extends ReadonlySet<unknown>> = T extends ReadonlySet<
   infer U
@@ -13,40 +14,53 @@ export interface InternalDimensionValue<Unit extends string> {
   readonly unit: Unit
 }
 
+export type InternalDimensionInput<Units extends string> = `${number}${Units}`
+
 export interface InternalDimensionOptions {
   minValue?: number | false | null | undefined
   maxValue?: number | false | null | undefined
 }
 
 export class InternalDimensionParser<
-  Units extends ReadonlySet<string>,
-  Value extends InternalDimensionValue<ValuesOfSet<Units>>,
-> implements Parser<InternalDimensionValue<ValuesOfSet<Units>>>
+    Units extends ReadonlySet<string>,
+    Value extends InternalDimensionValue<Unit>,
+    Unit extends ValuesOfSet<Units> = ValuesOfSet<Units>,
+  >
+  extends BaseParser<Value, InternalDimensionInput<Unit>>
+  implements Parser<Value, InternalDimensionInput<Unit>>
 {
   readonly units: ReadonlySet<string>
 
   #value: Value | null = null
-  readonly #createValue: (value: number, unit: ValuesOfSet<Units>) => Value
-  readonly #numberParser: InternalNumberParser
+  readonly #createValue: (value: number, unit: Unit) => Value
   readonly #label: string
+  readonly #min: number
+  readonly #max: number
 
   constructor(
     label: string,
     units: Units,
-    createValue: (value: number, unit: ValuesOfSet<Units>) => Value,
+    createValue: (value: number, unit: Unit) => Value,
     options?: InternalDimensionOptions,
   ) {
+    super()
     this.units = new Set(units)
     this.#createValue = createValue
-    this.#numberParser = new InternalNumberParser(
-      options?.minValue ?? false,
-      options?.maxValue ?? false,
-    )
+
     this.#label = label
+
+    this.#min =
+      options?.minValue == null || options.minValue === false
+        ? Number.NEGATIVE_INFINITY
+        : options.minValue
+    this.#max =
+      options?.maxValue == null || options.maxValue === false
+        ? Number.POSITIVE_INFINITY
+        : options.maxValue
   }
 
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
-    return state === 'current' && this.#value !== null
+  satisfied(state: ParserState): boolean {
+    return state === currentState && this.#value !== null
   }
 
   feed(token: Token): boolean {
@@ -57,12 +71,14 @@ export class InternalDimensionParser<
     if (token.type === 'literal') {
       for (const unit of this.units) {
         if (token.value.endsWith(unit)) {
-          const value = this.#numberParser.parse(
+          const value = parseNumericInput(
             token.value.slice(0, -unit.length),
+            this.#min,
+            this.#max,
           )
 
           if (value !== false) {
-            this.#value = this.#createValue(value, unit as ValuesOfSet<Units>)
+            this.#value = this.#createValue(value, unit as Unit)
             return true
           }
         }
@@ -71,16 +87,18 @@ export class InternalDimensionParser<
     return false
   }
 
-  check(token: Token, state: 'initial' | 'current'): boolean {
-    if (this.#value !== null && state === 'current') {
+  check(token: Token, state: ParserState): boolean {
+    if (this.#value !== null && state === currentState) {
       return false
     }
 
     if (token.type === 'literal') {
       for (const unit of this.units) {
         if (token.value.endsWith(unit)) {
-          const value = this.#numberParser.parse(
+          const value = parseNumericInput(
             token.value.slice(0, -unit.length),
+            this.#min,
+            this.#max,
           )
 
           return value !== false
@@ -103,7 +121,7 @@ export class InternalDimensionParser<
     this.#value = null
   }
 
-  toString(): string {
-    return this.#numberParser.toString(this.#label)
+  override toString(): string {
+    return stringifyNumericParser(this.#label, this.#min, this.#max)
   }
 }

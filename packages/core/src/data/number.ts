@@ -1,9 +1,13 @@
-import { InternalNumberParser } from '../internal/number'
+import {
+  type InternalNumberInput,
+  InternalNumberParser,
+} from '../internal/number'
 import type { Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
 
 const TypeBrand: unique symbol = Symbol('data/number')
+
+export type NumberInput = InternalNumberInput
 
 class NumberValue {
   readonly [TypeBrand] = TypeBrand
@@ -28,51 +32,20 @@ interface NumberOptions {
   max?: number | false | null | undefined
 }
 
-class NumberParser implements Parser<NumberValue> {
-  #value: NumberValue | null = null
-  #parser: InternalNumberParser
-
+class NumberParser
+  extends InternalNumberParser<NumberValue, NumberInput>
+  implements Parser<NumberValue, NumberInput>
+{
   constructor(options?: NumberOptions) {
-    this.#parser = new InternalNumberParser(
-      options?.min ?? false,
-      options?.max ?? false,
+    super(
+      options?.min == null || options.min === false
+        ? Number.NEGATIVE_INFINITY
+        : options.min,
+      options?.max == null || options.max === false
+        ? Number.POSITIVE_INFINITY
+        : options.max,
+      numberValue,
     )
-  }
-
-  satisfied(state: 'initial' | 'current' = 'current'): boolean {
-    return state === 'current' && this.#value !== null
-  }
-
-  feed(token: Token): boolean {
-    if (token.type === 'literal') {
-      const value = this.#parser.parse(token.value)
-
-      if (value !== false) {
-        this.#value = numberValue(value)
-        return true
-      }
-    }
-    return false
-  }
-
-  check(token: Token): boolean {
-    return token.type === 'literal' && this.#parser.parse(token.value) !== false
-  }
-
-  read(): NumberValue | undefined {
-    if (this.#value === null) {
-      return undefined
-    }
-
-    return this.#value
-  }
-
-  reset(): void {
-    this.#value = null
-  }
-
-  toString(): string {
-    return this.#parser.toString()
   }
 }
 
