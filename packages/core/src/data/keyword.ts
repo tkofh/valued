@@ -36,13 +36,13 @@ class KeywordParser<Value extends string>
   extends BaseParser<KeywordValue<Value>, Value>
   implements Parser<KeywordValue<Value>, Value>
 {
-  readonly keyword: string
+  readonly keywords: ReadonlySet<Value>
 
   #value: KeywordValue<Value> | null = null
 
-  constructor(keyword: Value) {
+  constructor(keywords: ReadonlySet<Value>) {
     super()
-    this.keyword = keyword
+    this.keywords = keywords
   }
 
   satisfied(state: ParserState): boolean {
@@ -52,7 +52,7 @@ class KeywordParser<Value extends string>
   feed(token: Token): boolean {
     if (
       token.type === 'literal' &&
-      token.value === this.keyword &&
+      this.keywords.has(token.value as Value) &&
       this.#value === null
     ) {
       this.#value = keywordValue(token.value as Value)
@@ -64,7 +64,7 @@ class KeywordParser<Value extends string>
   check(token: Token, state: ParserState): boolean {
     return (
       token.type === 'literal' &&
-      token.value === this.keyword &&
+      this.keywords.has(token.value as Value) &&
       (state === initialState || this.#value === null)
     )
   }
@@ -82,7 +82,7 @@ class KeywordParser<Value extends string>
   }
 
   override toString(): string {
-    return this.keyword
+    return Array.from(this.keywords).join(' | ')
   }
 }
 
@@ -91,5 +91,11 @@ export type { KeywordParser, KeywordValue }
 export function keyword<Value extends string>(
   value: Value,
 ): KeywordParser<Value> {
-  return new KeywordParser(value)
+  return new KeywordParser(new Set([value]))
+}
+
+export function keywords<Value extends string>(
+  values: ReadonlyArray<Value>,
+): KeywordParser<Value> {
+  return new KeywordParser(new Set(values))
 }
