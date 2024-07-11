@@ -8,6 +8,8 @@ import {
 } from './parser'
 import { tokenize } from './tokenizer'
 
+export type { ParserInput, ParserValue, ParseResult } from './parser'
+
 export function parse<P extends Parser<unknown, string>>(
   value: ParserInput<P> | (string & {}),
   parser: P,
