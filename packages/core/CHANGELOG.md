@@ -1,5 +1,11 @@
 # valued
 
+## 0.3.1
+
+### Patch Changes
+
+- c71d78e: export input, value and result types for parsers
+
 ## 0.3.0
 
 ### Minor Changes
