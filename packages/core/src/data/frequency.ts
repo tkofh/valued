@@ -4,7 +4,7 @@ import {
   type InternalDimensionValue,
   type ValuesOfSet,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/frequency')
@@ -42,7 +42,7 @@ interface FrequencyOptions extends InternalDimensionOptions {}
 
 class FrequencyParser
   extends InternalDimensionParser<FrequencyUnits, FrequencyValue>
-  implements Parser<FrequencyValue, FrequencyInput>
+  implements InternalParser<FrequencyValue>
 {
   constructor(options?: FrequencyOptions) {
     super('frequency', frequencyUnits, frequencyValue, options)
@@ -51,6 +51,8 @@ class FrequencyParser
 
 export type { FrequencyParser, FrequencyValue }
 
-export function frequency(options?: FrequencyOptions): FrequencyParser {
-  return new FrequencyParser(options)
+export function frequency(
+  options?: FrequencyOptions,
+): Parser<FrequencyValue, FrequencyInput> {
+  return new FrequencyParser(options) as never
 }

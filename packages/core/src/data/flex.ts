@@ -3,7 +3,7 @@ import {
   type InternalDimensionValue,
   type ValuesOfSet,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/flex')
@@ -36,7 +36,7 @@ export function isFlexValue(value: unknown): value is FlexValue {
 
 class FlexParser
   extends InternalDimensionParser<FlexUnits, FlexValue>
-  implements Parser<FlexValue, FlexInput>
+  implements InternalParser<FlexValue>
 {
   constructor() {
     super('flex', flexUnits, flexValue)
@@ -49,6 +49,6 @@ class FlexParser
 
 export type { FlexParser, FlexValue }
 
-export function flex(): FlexParser {
-  return new FlexParser()
+export function flex(): Parser<FlexValue, FlexInput> {
+  return new FlexParser() as never
 }

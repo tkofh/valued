@@ -1,5 +1,4 @@
-import { type Parser, type ParserState, currentState } from '../parser'
-import { BaseParser } from '../parser'
+import { type InternalParser, type ParserState, currentState } from '../parser'
 import type { Token } from '../tokenizer'
 import { parseNumericInput, stringifyNumericParser } from './number'
 
@@ -22,12 +21,10 @@ export interface InternalDimensionOptions {
 }
 
 export class InternalDimensionParser<
-    Units extends ReadonlySet<string>,
-    Value extends InternalDimensionValue<Unit>,
-    Unit extends ValuesOfSet<Units> = ValuesOfSet<Units>,
-  >
-  extends BaseParser<Value, InternalDimensionInput<Unit>>
-  implements Parser<Value, InternalDimensionInput<Unit>>
+  Units extends ReadonlySet<string>,
+  Value extends InternalDimensionValue<Unit>,
+  Unit extends ValuesOfSet<Units> = ValuesOfSet<Units>,
+> implements InternalParser<Value>
 {
   readonly units: ReadonlySet<string>
 
@@ -43,7 +40,6 @@ export class InternalDimensionParser<
     createValue: (value: number, unit: Unit) => Value,
     options?: InternalDimensionOptions,
   ) {
-    super()
     this.units = new Set(units)
     this.#createValue = createValue
 
@@ -121,7 +117,7 @@ export class InternalDimensionParser<
     this.#value = null
   }
 
-  override toString(): string {
+  toString(): string {
     return stringifyNumericParser(this.#label, this.#min, this.#max)
   }
 }

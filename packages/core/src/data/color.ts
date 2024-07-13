@@ -1,6 +1,6 @@
 import Color from 'colorjs.io'
 import {
-  BaseParser,
+  type InternalParser,
   type Parser,
   type ParserState,
   currentState,
@@ -32,10 +32,7 @@ export function isColorValue(value: unknown): value is ColorValue {
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class ColorParser
-  extends BaseParser<ColorValue, string>
-  implements Parser<ColorValue, string>
-{
+class ColorParser implements InternalParser<ColorValue> {
   #value: ColorValue | null = null
 
   satisfied(state: ParserState): boolean {
@@ -75,13 +72,13 @@ class ColorParser
     this.#value = null
   }
 
-  override toString(): string {
+  toString(): string {
     return '<color>'
   }
 }
 
 export type { ColorValue, ColorParser }
 
-export function color(): ColorParser {
-  return new ColorParser()
+export function color(): Parser<ColorValue, string> {
+  return new ColorParser() as never
 }

@@ -1,5 +1,5 @@
 import {
-  BaseParser,
+  type InternalParser,
   type Parser,
   type ParserState,
   currentState,
@@ -33,15 +33,13 @@ export function isKeywordValue<Value extends string>(
 }
 
 class KeywordParser<Value extends string>
-  extends BaseParser<KeywordValue<Value>, Value>
-  implements Parser<KeywordValue<Value>, Value>
+  implements InternalParser<KeywordValue<Value>>
 {
   readonly keywords: ReadonlySet<Value>
 
   #value: KeywordValue<Value> | null = null
 
   constructor(keywords: ReadonlySet<Value>) {
-    super()
     this.keywords = keywords
   }
 
@@ -81,7 +79,7 @@ class KeywordParser<Value extends string>
     this.#value = null
   }
 
-  override toString(): string {
+  toString(): string {
     return Array.from(this.keywords).join(' | ')
   }
 }
@@ -90,12 +88,12 @@ export type { KeywordParser, KeywordValue }
 
 export function keyword<const Value extends string>(
   value: Value,
-): KeywordParser<Value> {
-  return new KeywordParser(new Set([value]))
+): Parser<KeywordValue<Value>, Value> {
+  return new KeywordParser(new Set([value])) as never
 }
 
 export function keywords<const Values extends ReadonlyArray<string>>(
   values: Values,
-): KeywordParser<Values[number]> {
-  return new KeywordParser(new Set(values))
+): Parser<KeywordValue<Values[number]>, Values[number]> {
+  return new KeywordParser(new Set(values)) as never
 }

@@ -4,7 +4,7 @@ import {
   type InternalDimensionValue,
   type ValuesOfSet,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/lengthPercentage')
@@ -101,11 +101,7 @@ class LengthPercentageParser<Units extends ReadonlySet<LengthPercentageUnit>>
     Units,
     LengthPercentageValue<ValuesOfSet<Units>>
   >
-  implements
-    Parser<
-      LengthPercentageValue<ValuesOfSet<Units>>,
-      LengthPercentageInput<ValuesOfSet<Units>>
-    >
+  implements InternalParser<LengthPercentageValue<ValuesOfSet<Units>>>
 {
   constructor(units: Units, options?: LengthPercentageOptions) {
     super('lengthPercentage', units, lengthPercentageValue, options)
@@ -115,27 +111,39 @@ class LengthPercentageParser<Units extends ReadonlySet<LengthPercentageUnit>>
 export type { LengthPercentageParser, LengthPercentageValue }
 
 type LengthPercentageConstructor = {
-  <const Units extends ReadonlyArray<LengthPercentageUnit>>(
+  (
     options?: LengthPercentageOptions,
-  ): LengthPercentageParser<ReadonlySet<Units[number]>>
+  ): Parser<
+    LengthPercentageValue<LengthPercentageUnit>,
+    LengthPercentageInput<LengthPercentageUnit>
+  >
   subset<const Units extends ReadonlyArray<LengthPercentageUnit>>(
     units: Units,
     options?: LengthPercentageOptions,
-  ): LengthPercentageParser<ReadonlySet<Units[number]>>
+  ): Parser<
+    LengthPercentageValue<Units[number]>,
+    LengthPercentageInput<Units[number]>
+  >
 }
 
-const lengthPercentage = function lengthPercentage(
+const lengthPercentage = ((
   options?: LengthPercentageOptions,
-): LengthPercentageParser<LengthPercentageUnits> {
-  return new LengthPercentageParser(lengthPercentageUnits, options)
-} as LengthPercentageConstructor
+): Parser<
+  LengthPercentageValue<LengthPercentageUnit>,
+  LengthPercentageInput<LengthPercentageUnit>
+> =>
+  new LengthPercentageParser(
+    lengthPercentageUnits,
+    options,
+  ) as never) as LengthPercentageConstructor
 
-lengthPercentage.subset = function lengthPercentageSubset<
-  const Units extends ReadonlyArray<string>,
->(
+lengthPercentage.subset = (<const Units extends ReadonlyArray<string>>(
   units: Units,
   options?: LengthPercentageOptions,
-): LengthPercentageParser<ReadonlySet<Units[number] & LengthPercentageUnit>> {
+): Parser<
+  LengthPercentageValue<LengthPercentageUnit & Units[number]>,
+  LengthPercentageInput<LengthPercentageUnit & Units[number]>
+> => {
   const intersection: Set<Units[number] & LengthPercentageUnit> = new Set()
   for (const unit of units) {
     if (lengthPercentageUnits.has(unit as LengthPercentageUnit)) {
@@ -143,7 +151,7 @@ lengthPercentage.subset = function lengthPercentageSubset<
     }
   }
 
-  return new LengthPercentageParser(intersection, options)
-} as LengthPercentageConstructor['subset']
+  return new LengthPercentageParser(intersection, options) as never
+}) as LengthPercentageConstructor['subset']
 
 export { lengthPercentage }

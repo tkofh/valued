@@ -4,7 +4,7 @@ import {
   type InternalDimensionValue,
   type ValuesOfSet,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/percentage')
@@ -39,7 +39,7 @@ interface PercentageOptions extends InternalDimensionOptions {}
 
 class PercentageParser
   extends InternalDimensionParser<PercentageUnits, PercentageValue>
-  implements Parser<PercentageValue, PercentageInput>
+  implements InternalParser<PercentageValue>
 {
   constructor(options?: PercentageOptions) {
     super('percentage', percentageUnits, percentageValue, options)
@@ -48,6 +48,8 @@ class PercentageParser
 
 export type { PercentageParser, PercentageValue }
 
-export function percentage(options?: PercentageOptions): PercentageParser {
-  return new PercentageParser(options)
+export function percentage(
+  options?: PercentageOptions,
+): Parser<PercentageValue, PercentageInput> {
+  return new PercentageParser(options) as never
 }

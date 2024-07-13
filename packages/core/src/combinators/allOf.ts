@@ -1,13 +1,15 @@
 import {
   type AnyParser,
-  BaseParser,
+  type InternalParser,
   type Parser,
+  type ParserInput,
   type ParserState,
+  type ParserValue,
   currentState,
   initialState,
 } from '../parser'
+import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
-import type { ExtractParserInputs, ExtractParserValues } from './types'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends [string]
   ? T[0]
@@ -34,26 +36,52 @@ type Combinations<T extends ReadonlyArray<string>> = T extends [string]
               | `${T[2]} ${Combinations<[T[0], T[1], T[3], T[4]]>}`
               | `${T[3]} ${Combinations<[T[0], T[1], T[2], T[4]]>}`
               | `${T[4]} ${Combinations<[T[0], T[1], T[2], T[3]]>}`
-          : string
+          : T extends []
+            ? ''
+            : string
 
-export type AllOfInput<Parsers extends ReadonlyArray<AnyParser>> = Combinations<
-  ExtractParserInputs<Parsers>
->
+type InternalAllOfInput<
+  Parsers extends ReadonlyArray<AnyParser>,
+  Inputs extends ReadonlyArray<string> = [],
+> = Inputs['length'] extends Parsers['length']
+  ? Combinations<Inputs>
+  : InternalAllOfInput<
+      Parsers,
+      [...Inputs, ParserInput<Parsers[Inputs['length']]>]
+    >
 
-class AllOf<
-    Parsers extends ReadonlyArray<AnyParser>,
-    Input extends string = AllOfInput<Parsers>,
-  >
-  extends BaseParser<ExtractParserValues<Parsers>, Input>
-  implements Parser<ExtractParserValues<Parsers>, Input>
+export type AllOfInput<T extends ReadonlyArray<AnyParser>> =
+  InternalAllOfInput<T>
+
+type InternalAllOfValue<
+  Parsers extends ReadonlyArray<AnyParser>,
+  Values extends ReadonlyArray<unknown> = [],
+> = Values['length'] extends Parsers['length']
+  ? Values
+  : InternalAllOfValue<
+      Parsers,
+      [...Values, ParserValue<Parsers[Values['length']]>]
+    >
+
+export type AllOfValue<Parsers extends ReadonlyArray<AnyParser>> =
+  InternalAllOfValue<Parsers>
+
+const TypeBrand: unique symbol = Symbol('combinators/allOf')
+
+function isAllOf(value: unknown): value is AllOf<ReadonlyArray<AnyParser>> {
+  return isRecordOrArray(value) && TypeBrand in value
+}
+
+class AllOf<const Parsers extends ReadonlyArray<AnyParser>>
+  implements InternalParser<AllOfValue<Parsers>>
 {
+  readonly [TypeBrand] = TypeBrand
   readonly parsers!: ReadonlySet<AnyParser>
 
   #candidates: Set<Parsers[number]> = new Set()
   #satisfied: Set<Parsers[number]> = new Set()
 
   constructor(parsers: Parsers) {
-    super()
     if (parsers.length === 0) {
       throw new TypeError('allOf() parser must have at least one parser')
     }
@@ -61,7 +89,7 @@ class AllOf<
     const storage = new Set<AnyParser>()
 
     for (const parser of parsers) {
-      if (parser instanceof AllOf) {
+      if (isAllOf(parser)) {
         for (const child of parser.parsers) {
           storage.add(child)
         }
@@ -101,7 +129,7 @@ class AllOf<
     return this.#checkAll(token, state)
   }
 
-  read(): ExtractParserValues<Parsers> | undefined {
+  read(): AllOfValue<Parsers> | undefined {
     const result = [] as Array<unknown>
 
     for (const parser of this.parsers) {
@@ -114,7 +142,7 @@ class AllOf<
       result.push(value)
     }
 
-    return result as ExtractParserValues<Parsers>
+    return result as AllOfValue<Parsers>
   }
 
   reset() {
@@ -126,7 +154,7 @@ class AllOf<
     }
   }
 
-  override toString(): string {
+  toString(): string {
     return Array.from(this.parsers, (parser) => parser.toString()).join(' && ')
   }
 
@@ -287,24 +315,24 @@ export type { AllOf }
 type AllOfConstructor = {
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,
-  ): AllOf<Parsers>
+  ): Parser<AllOfValue<Parsers>, AllOfInput<Parsers>>
   withInput<Input extends string>(): <
     const Parsers extends ReadonlyArray<AnyParser>,
   >(
     parsers: Parsers,
-  ) => AllOf<Parsers, Input>
+  ) => Parser<AllOfValue<Parsers>, Input>
 }
 
-const allOf: AllOfConstructor = function allOfg<
-  const Parsers extends ReadonlyArray<AnyParser>,
->(parsers: Parsers): AllOf<Parsers> {
-  return new AllOf(parsers)
-} as AllOfConstructor
+const allOf = (<const Parsers extends ReadonlyArray<AnyParser>>(
+  parsers: Parsers,
+): Parser<AllOfValue<Parsers>, AllOfInput<Parsers>> =>
+  new AllOf(parsers) as never) as AllOfConstructor
 
-allOf.withInput = (<Input extends string>() =>
+allOf.withInput =
+  <Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,
-  ): AllOf<Parsers, Input> =>
-    new AllOf(parsers)) as AllOfConstructor['withInput']
+  ): Parser<AllOfValue<Parsers>, Input> =>
+    new AllOf(parsers) as never
 
 export { allOf }

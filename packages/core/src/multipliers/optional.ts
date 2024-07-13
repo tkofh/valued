@@ -1,21 +1,22 @@
-import {
-  type AnyParser,
-  BaseParser,
-  type Parser,
-  type ParserInput,
-  type ParserState,
-  type ParserValue,
+import type {
+  AnyParser,
+  InternalParser,
+  Parser,
+  ParserInput,
+  ParserState,
+  ParserValue,
 } from '../parser'
 import type { Token } from '../tokenizer'
 
-class Optional<P extends AnyParser, Input extends string = ParserInput<P> | ''>
-  extends BaseParser<ParserValue<P> | null, Input>
-  implements Parser<ParserValue<P> | null, Input>
+export type OptionalValue<P extends AnyParser> = ParserValue<P> | null
+export type OptionalInput<P extends AnyParser> = ParserInput<P> | ''
+
+class Optional<P extends AnyParser>
+  implements InternalParser<ParserValue<P> | null>
 {
   readonly parser: P
 
   constructor(parser: P) {
-    super()
     this.parser = parser
   }
 
@@ -45,11 +46,13 @@ class Optional<P extends AnyParser, Input extends string = ParserInput<P> | ''>
     this.parser.reset()
   }
 
-  override toString(): string {
+  toString(): string {
     return `${this.parser.toString()}?`
   }
 }
 
-export function optional<P extends AnyParser>(parser: P): Optional<P> {
-  return new Optional(parser)
+export function optional<P extends AnyParser>(
+  parser: P,
+): Parser<OptionalValue<P>, OptionalInput<P>> {
+  return new Optional(parser) as never
 }

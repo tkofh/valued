@@ -1,17 +1,15 @@
 import {
   type AnyParser,
-  BaseParser,
+  type InternalParser,
   type Parser,
+  type ParserInput,
   type ParserState,
+  type ParserValue,
   currentState,
   initialState,
 } from '../parser'
+import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
-import type {
-  ExtractParserInputs,
-  ExtractParserValues,
-  FilterStrings,
-} from './types'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends []
   ? ''
@@ -60,23 +58,48 @@ type Combinations<T extends ReadonlyArray<string>> = T extends []
                 | `${T[4]} ${Combinations<[T[0], T[1], T[2], T[3]]>}`
             : string
 
-export type SomeOfInput<Parsers extends ReadonlyArray<AnyParser>> =
-  Combinations<FilterStrings<ExtractParserInputs<Parsers>>>
+type InternalSomeOfValue<
+  Parsers extends ReadonlyArray<AnyParser>,
+  Values extends ReadonlyArray<unknown> = [],
+> = Values['length'] extends Parsers['length']
+  ? Values
+  : InternalSomeOfValue<
+      Parsers,
+      [...Values, ParserValue<Parsers[Values['length']]>]
+    >
 
-class SomeOf<
-    Parsers extends ReadonlyArray<AnyParser>,
-    Input extends string = SomeOfInput<Parsers>,
-  >
-  extends BaseParser<ExtractParserValues<Parsers>, Input>
-  implements Parser<ExtractParserValues<Parsers>, Input>
+export type SomeOfValue<Parsers extends ReadonlyArray<AnyParser>> =
+  InternalSomeOfValue<Parsers>
+
+type InternalSomeOfInput<
+  Parsers extends ReadonlyArray<AnyParser>,
+  Inputs extends ReadonlyArray<string> = [],
+> = Inputs['length'] extends Parsers['length']
+  ? Combinations<Inputs>
+  : InternalSomeOfInput<
+      Parsers,
+      [...Inputs, ParserInput<Parsers[Inputs['length']]>]
+    >
+
+export type SomeOfInput<Parsers extends ReadonlyArray<AnyParser>> =
+  InternalSomeOfInput<Parsers, []>
+
+const TypeBrand: unique symbol = Symbol('combinators/someOf')
+
+function isSomeOf(value: unknown): value is SomeOf<ReadonlyArray<AnyParser>> {
+  return isRecordOrArray(value) && TypeBrand in value
+}
+
+class SomeOf<const Parsers extends ReadonlyArray<AnyParser>>
+  implements InternalParser<SomeOfValue<Parsers>>
 {
+  readonly [TypeBrand] = TypeBrand
   readonly parsers: ReadonlySet<AnyParser>
 
   #candidates: Set<Parsers[number]> = new Set()
   #satisfied: Set<Parsers[number]> = new Set()
 
   constructor(parsers: Parsers) {
-    super()
     if (parsers.length === 0) {
       throw new RangeError('someOf() parser must have at least one parser')
     }
@@ -84,7 +107,7 @@ class SomeOf<
     const storage = new Set<AnyParser>()
 
     for (const parser of parsers) {
-      if (parser instanceof SomeOf) {
+      if (isSomeOf(parser)) {
         for (const child of parser.parsers) {
           storage.add(child)
         }
@@ -129,7 +152,7 @@ class SomeOf<
     return this.#checkAll(token, state)
   }
 
-  read(): ExtractParserValues<Parsers> | undefined {
+  read(): SomeOfValue<Parsers> | undefined {
     const result = [] as Array<unknown>
 
     let isSatisfied = false
@@ -149,7 +172,7 @@ class SomeOf<
       return undefined
     }
 
-    return result as ExtractParserValues<Parsers>
+    return result as SomeOfValue<Parsers>
   }
 
   reset() {
@@ -161,7 +184,7 @@ class SomeOf<
     }
   }
 
-  override toString(): string {
+  toString(): string {
     return Array.from(this.parsers, (parser) => parser.toString()).join(' || ')
   }
 
@@ -322,24 +345,25 @@ export type { SomeOf }
 type SomeOfConstructor = {
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,
-  ): SomeOf<Parsers>
+  ): Parser<SomeOfValue<Parsers>, SomeOfInput<Parsers>>
   withInput<Input extends string>(): <
     const Parsers extends ReadonlyArray<AnyParser>,
   >(
     parsers: Parsers,
-  ) => SomeOf<Parsers, Input>
+  ) => Parser<SomeOfValue<Parsers>, Input>
 }
 
-const someOf: SomeOfConstructor = function someOf<
+const someOf: SomeOfConstructor = (<
   const Parsers extends ReadonlyArray<AnyParser>,
->(parsers: Parsers): SomeOf<Parsers> {
-  return new SomeOf(parsers)
-} as SomeOfConstructor
+>(
+  parsers: Parsers,
+): Parser<SomeOfValue<Parsers>, SomeOfInput<Parsers>> =>
+  new SomeOf(parsers) as never) as SomeOfConstructor
 
 someOf.withInput = (<Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,
-  ): SomeOf<Parsers, Input> =>
-    new SomeOf(parsers)) as SomeOfConstructor['withInput']
+  ): Parser<SomeOfValue<Parsers>, Input> =>
+    new SomeOf(parsers) as never) as SomeOfConstructor['withInput']
 
 export { someOf }

@@ -1,9 +1,4 @@
-import {
-  BaseParser,
-  type Parser,
-  type ParserState,
-  currentState,
-} from '../parser'
+import { type InternalParser, type ParserState, currentState } from '../parser'
 import type { Token } from '../tokenizer'
 
 const infinity = '∞'
@@ -40,10 +35,7 @@ export function stringifyNumericParser(
 
 export type InternalNumberInput = `${number}`
 
-export class InternalNumberParser<Value, Input extends string>
-  extends BaseParser<Value, Input>
-  implements Parser<Value, Input>
-{
+export class InternalNumberParser<Value> implements InternalParser<Value> {
   readonly #min: number
   readonly #max: number
   readonly #createValue: (value: number) => Value
@@ -51,7 +43,6 @@ export class InternalNumberParser<Value, Input extends string>
   #value: Value | null = null
 
   constructor(min: number, max: number, createValue: (value: number) => Value) {
-    super()
     this.#min = min
     this.#max = max
     this.#createValue = createValue
@@ -101,7 +92,7 @@ export class InternalNumberParser<Value, Input extends string>
     this.#value = null
   }
 
-  override toString(label = 'number') {
+  toString(label = 'number') {
     return stringifyNumericParser(label, this.#min, this.#max)
   }
 

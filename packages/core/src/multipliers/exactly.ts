@@ -1,5 +1,15 @@
-import { Range } from '../internal/range'
-import type { AnyParser } from '../parser'
+import { Range, type RangeInput, type RangeValue } from '../internal/range'
+import type { AnyParser, Parser } from '../parser'
+
+export type ExactlyValue<
+  P extends AnyParser,
+  Count extends number,
+> = RangeValue<P, Count, Count>
+
+export type ExactlyInput<
+  P extends AnyParser,
+  Count extends number,
+> = RangeInput<P, false, Count, Count>
 
 class Exactly<P extends AnyParser, Count extends number> extends Range<
   P,
@@ -15,9 +25,9 @@ class Exactly<P extends AnyParser, Count extends number> extends Range<
   }
 }
 
-export function exactly<P extends AnyParser, const Count extends number>(
+export function exactly<const P extends AnyParser, const Count extends number>(
   parser: P,
   count: Count,
-): Exactly<P, Count> {
-  return new Exactly(parser, count)
+): Parser<ExactlyValue<P, Count>, ExactlyInput<P, Count>> {
+  return new Exactly(parser, count) as never
 }

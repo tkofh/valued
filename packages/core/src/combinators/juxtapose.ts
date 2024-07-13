@@ -1,20 +1,15 @@
 import {
   type AnyParser,
-  BaseParser,
+  type InternalParser,
   type Parser,
+  type ParserInput,
   type ParserState,
   currentState,
   initialState,
 } from '../parser'
+import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
-import type {
-  ExtractParserInputs,
-  ExtractParserValues,
-  FilterStrings,
-} from './types'
-
-type JuxtaposeValue<Parsers extends ReadonlyArray<AnyParser | string>> =
-  FilterStrings<ExtractParserValues<Parsers>>
+import type { FilterStrings } from './types'
 
 type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
   ? ''
@@ -60,22 +55,54 @@ type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
                   ? `${T[0]} ${T[1]} ${T[2]} ${T[3]} ${T[4]} ${T[5]} ${T[6]} ${T[7]}`
                   : string
 
-type JuxtaposeInput<Parsers extends ReadonlyArray<AnyParser | string>> =
-  JoinWithSpace<ExtractParserInputs<Parsers, string>>
+type Extract<Parsers extends ReadonlyArray<AnyParser | string>> = {
+  [K in keyof Parsers]: Parsers[K] extends Parser<unknown, infer I>
+    ? I
+    : Parsers[K] extends string
+      ? Parsers[K]
+      : never
+}
 
-class Juxtapose<
-    Parsers extends ReadonlyArray<AnyParser | string>,
-    Input extends string = JuxtaposeInput<Parsers>,
-  >
-  extends BaseParser<JuxtaposeValue<Parsers>, Input>
-  implements Parser<JuxtaposeValue<Parsers>, Input>
+export type JuxtaposeValue<Parsers extends ReadonlyArray<AnyParser | string>> =
+  FilterStrings<Extract<Parsers>>
+
+type JuxtaposeItemInput<Parser extends AnyParser | string> =
+  Parser extends AnyParser
+    ? ParserInput<Parser>
+    : Parser extends string
+      ? Parser
+      : never
+
+type InternalJuxtaposeInput<
+  Parsers extends ReadonlyArray<AnyParser | string>,
+  Inputs extends ReadonlyArray<string> = [],
+> = Inputs['length'] extends Parsers['length']
+  ? JoinWithSpace<Inputs>
+  : InternalJuxtaposeInput<
+      Parsers,
+      [...Inputs, JuxtaposeItemInput<Parsers[Inputs['length']]>]
+    >
+
+export type JuxtaposeInput<Parsers extends ReadonlyArray<AnyParser | string>> =
+  InternalJuxtaposeInput<Parsers>
+
+const TypeBrand: unique symbol = Symbol('combinators/juxtapose')
+
+function isJuxtapose(
+  value: unknown,
+): value is Juxtapose<ReadonlyArray<AnyParser | string>> {
+  return isRecordOrArray(value) && TypeBrand in value
+}
+
+class Juxtapose<const Parsers extends ReadonlyArray<AnyParser | string>>
+  implements InternalParser<JuxtaposeValue<Parsers>>
 {
+  readonly [TypeBrand] = TypeBrand
   readonly structure: ReadonlyArray<AnyParser | string>
 
   #index = 0
 
   constructor(structure: Parsers) {
-    super()
     if (structure.length === 0) {
       throw new RangeError('juxtapose() parser must have at least one parser')
     }
@@ -83,7 +110,7 @@ class Juxtapose<
     const storage: Array<AnyParser | string> = []
 
     for (const parser of structure) {
-      if (parser instanceof Juxtapose) {
+      if (isJuxtapose(parser)) {
         storage.push(...parser.structure)
       } else {
         storage.push(parser)
@@ -144,7 +171,7 @@ class Juxtapose<
     }
   }
 
-  override toString(): string {
+  toString(): string {
     return Array.from(this.structure, (parser) => parser.toString()).join(' ')
   }
 
@@ -207,24 +234,25 @@ export type { Juxtapose }
 type JuxtaposeConstructor = {
   <const Parsers extends ReadonlyArray<AnyParser | string>>(
     parsers: Parsers,
-  ): Juxtapose<Parsers>
+  ): Parser<JuxtaposeValue<Parsers>, JuxtaposeInput<Parsers>>
   withInput<Input extends string>(): <
     const Parsers extends ReadonlyArray<AnyParser | string>,
   >(
     parsers: Parsers,
-  ) => Juxtapose<Parsers, Input>
+  ) => Parser<JuxtaposeValue<Parsers>, Input>
 }
 
-const juxtapose: JuxtaposeConstructor = function juxtapose<
+const juxtapose: JuxtaposeConstructor = (<
   const Parsers extends ReadonlyArray<AnyParser | string>,
->(parsers: Parsers): Juxtapose<Parsers> {
-  return new Juxtapose(parsers)
-} as JuxtaposeConstructor
+>(
+  parsers: Parsers,
+): Parser<JuxtaposeValue<Parsers>, JuxtaposeInput<Parsers>> =>
+  new Juxtapose(parsers) as never) as JuxtaposeConstructor
 
 juxtapose.withInput = (<Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser | string>>(
     parsers: Parsers,
-  ): Juxtapose<Parsers, Input> =>
-    new Juxtapose(parsers)) as JuxtaposeConstructor['withInput']
+  ): Parser<JuxtaposeValue<Parsers>, Input> =>
+    new Juxtapose(parsers) as never) as JuxtaposeConstructor['withInput']
 
 export { juxtapose }

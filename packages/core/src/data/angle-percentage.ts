@@ -4,7 +4,7 @@ import {
   type InternalDimensionValue,
   type ValuesOfSet,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/anglePercentage')
@@ -64,7 +64,7 @@ interface AnglePercentageOptions extends InternalDimensionOptions {}
 
 class AnglePercentageParser
   extends InternalDimensionParser<AnglePercentageUnits, AnglePercentageValue>
-  implements Parser<AnglePercentageValue, AnglePercentageInput>
+  implements InternalParser<AnglePercentageValue>
 {
   constructor(options?: AnglePercentageOptions) {
     super(
@@ -80,6 +80,6 @@ export type { AnglePercentageParser, AnglePercentageValue }
 
 export function anglePercentage(
   options?: AnglePercentageOptions,
-): AnglePercentageParser {
-  return new AnglePercentageParser(options)
+): Parser<AnglePercentageValue, AnglePercentageInput> {
+  return new AnglePercentageParser(options) as never
 }

@@ -1,6 +1,6 @@
 import {
   type AnyParser,
-  BaseParser,
+  type InternalParser,
   type Parser,
   type ParserInput,
   type ParserState,
@@ -13,19 +13,18 @@ export type OneOfInput<Parsers extends ReadonlyArray<AnyParser>> = ParserInput<
   Parsers[number]
 >
 
-class OneOf<
-    Parsers extends ReadonlyArray<AnyParser>,
-    Input extends string = OneOfInput<Parsers>,
-  >
-  extends BaseParser<ParserValue<Parsers[number]>, Input>
-  implements Parser<ParserValue<Parsers[number]>, Input>
+export type OneOfValue<Parsers extends ReadonlyArray<AnyParser>> = ParserValue<
+  Parsers[number]
+>
+
+class OneOf<const Parsers extends ReadonlyArray<AnyParser>>
+  implements InternalParser<ParserValue<Parsers[number]>>
 {
   readonly parsers: ReadonlySet<AnyParser>
 
   #candidates: Set<AnyParser> = new Set()
 
   constructor(parsers: Parsers) {
-    super()
     if (parsers.length === 0) {
       throw new TypeError('oneOf() parser must have at least one parser')
     }
@@ -70,7 +69,7 @@ class OneOf<
     }
   }
 
-  override toString(): string {
+  toString(): string {
     return Array.from(this.parsers, (parser) => parser.toString()).join(' | ')
   }
 
@@ -176,24 +175,25 @@ export type { OneOf }
 type OneOfConstructor = {
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,
-  ): OneOf<Parsers>
+  ): Parser<OneOfValue<Parsers>, OneOfInput<Parsers>>
   withInput<const Input extends string>(): <
     const Parsers extends ReadonlyArray<AnyParser>,
   >(
     parsers: Parsers,
-  ) => OneOf<Parsers, Input>
+  ) => Parser<OneOfValue<Parsers>, Input>
 }
 
-const oneOf: OneOfConstructor = function oneOf<
+const oneOf: OneOfConstructor = (<
   const Parsers extends ReadonlyArray<AnyParser>,
->(parsers: Parsers): OneOf<Parsers> {
-  return new OneOf(parsers)
-} as OneOfConstructor
+>(
+  parsers: Parsers,
+): Parser<OneOfValue<Parsers>, OneOfInput<Parsers>> =>
+  new OneOf(parsers) as never) as OneOfConstructor
 
 oneOf.withInput = (<Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,
-  ): OneOf<Parsers, Input> =>
-    new OneOf(parsers)) as OneOfConstructor['withInput']
+  ): Parser<OneOfValue<Parsers>, Input> =>
+    new OneOf(parsers) as never) as OneOfConstructor['withInput']
 
 export { oneOf }

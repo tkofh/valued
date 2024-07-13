@@ -3,7 +3,7 @@ import {
   InternalDimensionParser,
   type InternalDimensionValue,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 type ValuesOfSet<T extends ReadonlySet<unknown>> = T extends ReadonlySet<
@@ -47,11 +47,7 @@ interface DimensionOptions extends InternalDimensionOptions {}
 
 class DimensionParser<Units extends ReadonlySet<string>>
   extends InternalDimensionParser<Units, DimensionValue<ValuesOfSet<Units>>>
-  implements
-    Parser<
-      DimensionValue<ValuesOfSet<Units>>,
-      DimensionInput<ValuesOfSet<Units>>
-    >
+  implements InternalParser<DimensionValue<ValuesOfSet<Units>>>
 {
   constructor(units: Units, options?: DimensionOptions) {
     super('dimension', units, dimensionValue, options)
@@ -63,6 +59,6 @@ export type { DimensionParser, DimensionValue }
 export function dimension<const Units extends ReadonlyArray<string>>(
   units: Units,
   options?: DimensionOptions,
-): DimensionParser<ReadonlySet<Units[number]>> {
-  return new DimensionParser(new Set(units), options)
+): Parser<DimensionValue<Units[number]>, DimensionInput<Units[number]>> {
+  return new DimensionParser(new Set(units), options) as never
 }

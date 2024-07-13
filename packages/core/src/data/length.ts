@@ -4,7 +4,7 @@ import {
   type InternalDimensionValue,
   type ValuesOfSet,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/length')
@@ -96,8 +96,7 @@ interface LengthOptions extends InternalDimensionOptions {}
 
 class LengthParser<Units extends ReadonlySet<LengthUnit>>
   extends InternalDimensionParser<Units, LengthValue<ValuesOfSet<Units>>>
-  implements
-    Parser<LengthValue<ValuesOfSet<Units>>, LengthInput<ValuesOfSet<Units>>>
+  implements InternalParser<LengthValue<ValuesOfSet<Units>>>
 {
   constructor(units: Units, options?: LengthOptions) {
     super('length', units, lengthValue, options)
@@ -107,19 +106,22 @@ class LengthParser<Units extends ReadonlySet<LengthUnit>>
 export type { LengthParser, LengthValue }
 
 type LengthConstructor = {
-  <const Units extends ReadonlyArray<LengthUnit>>(
+  (
     options?: LengthOptions,
-  ): LengthParser<ReadonlySet<Units[number]>>
+  ): Parser<LengthValue<LengthUnit>, LengthInput<LengthUnit>>
   subset<const Units extends ReadonlyArray<LengthUnit>>(
     units: Units,
     options?: LengthOptions,
-  ): LengthParser<ReadonlySet<Units[number]>>
+  ): Parser<
+    LengthValue<LengthUnit & Units[number]>,
+    LengthInput<LengthUnit & Units[number]>
+  >
 }
 
 const length = function length(
   options?: LengthOptions,
-): LengthParser<LengthUnits> {
-  return new LengthParser(lengthUnits, options)
+): Parser<LengthValue<LengthUnit>, LengthInput<LengthUnit>> {
+  return new LengthParser(lengthUnits, options) as never
 } as LengthConstructor
 
 length.subset = function lengthSubset<
@@ -127,7 +129,10 @@ length.subset = function lengthSubset<
 >(
   units: Units,
   options?: LengthOptions,
-): LengthParser<ReadonlySet<Units[number] & LengthUnit>> {
+): Parser<
+  LengthValue<LengthUnit & Units[number]>,
+  LengthInput<LengthUnit & Units[number]>
+> {
   const intersection: Set<Units[number] & LengthUnit> = new Set()
   for (const unit of units) {
     if (lengthUnits.has(unit as LengthUnit)) {
@@ -135,7 +140,7 @@ length.subset = function lengthSubset<
     }
   }
 
-  return new LengthParser(intersection, options)
+  return new LengthParser(intersection, options) as never
 } as LengthConstructor['subset']
 
 export { length }

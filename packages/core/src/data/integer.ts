@@ -1,5 +1,5 @@
 import { InternalNumberParser } from '../internal/number'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/integer')
@@ -30,8 +30,8 @@ interface IntegerOptions {
 }
 
 class IntegerParser
-  extends InternalNumberParser<IntegerValue, IntegerInput>
-  implements Parser<IntegerValue, IntegerInput>
+  extends InternalNumberParser<IntegerValue>
+  implements InternalParser<IntegerValue>
 {
   constructor(options?: IntegerOptions) {
     super(
@@ -52,6 +52,8 @@ class IntegerParser
 
 export type { IntegerValue, IntegerParser }
 
-export function integer(options?: IntegerOptions): IntegerParser {
-  return new IntegerParser(options)
+export function integer(
+  options?: IntegerOptions,
+): Parser<IntegerValue, IntegerInput> {
+  return new IntegerParser(options) as never
 }

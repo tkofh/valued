@@ -4,7 +4,7 @@ import {
   type InternalDimensionValue,
   type ValuesOfSet,
 } from '../internal/dimension'
-import type { Parser } from '../parser'
+import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
 const TypeBrand: unique symbol = Symbol('data/angle')
@@ -55,7 +55,7 @@ interface AngleOptions extends InternalDimensionOptions {}
 
 class AngleParser
   extends InternalDimensionParser<AngleUnits, AngleValue>
-  implements Parser<AngleValue, AngleInput>
+  implements InternalParser<AngleValue>
 {
   constructor(options?: AngleOptions) {
     super('angle', angleUnits, angleValue, options)
@@ -64,6 +64,6 @@ class AngleParser
 
 export type { AngleParser, AngleValue }
 
-export function angle(options?: AngleOptions): AngleParser {
-  return new AngleParser(options)
+export function angle(options?: AngleOptions): Parser<AngleValue, AngleInput> {
+  return new AngleParser(options) as never
 }

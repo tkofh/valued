@@ -1,7 +1,6 @@
 import {
   type AnyParser,
-  BaseParser,
-  type Parser,
+  type InternalParser,
   type ParserInput,
   type ParserState,
   type ParserValue,
@@ -149,15 +148,30 @@ export type RangeInput<
     : string
   : string
 
+type Tuple<
+  N extends number,
+  T,
+  R extends ReadonlyArray<T> = [],
+> = R['length'] extends N ? R : Tuple<N, T, [...R, T]>
+
+export type RangeValue<
+  P extends AnyParser,
+  Min extends number,
+  Max extends number,
+> = Min extends Integer
+  ? Max extends Integer
+    ? {
+        [K in NumberRange<Min, Max>]: Tuple<K, ParserValue<P>>
+      }[NumberRange<Min, Max>]
+    : string
+  : string
+
 export class Range<
-    P extends AnyParser,
-    CommaSeparated extends boolean,
-    Min extends number,
-    Max extends number,
-    Input extends string = RangeInput<P, CommaSeparated, Min, Max>,
-  >
-  extends BaseParser<ReadonlyArray<ParserValue<P>>, Input>
-  implements Parser<ReadonlyArray<ParserValue<P>>, Input>
+  P extends AnyParser,
+  CommaSeparated extends boolean,
+  Min extends number,
+  Max extends number,
+> implements InternalParser<RangeValue<P, Min, Max>>
 {
   readonly parser: P
   readonly minLength: number
@@ -174,8 +188,6 @@ export class Range<
     maxLength: number | false,
     commaSeparated: CommaSeparated,
   ) {
-    super()
-
     if (maxLength !== false && minLength > maxLength) {
       throw new RangeError('minLength must be less than or equal to maxLength')
     }
@@ -263,7 +275,7 @@ export class Range<
     return initial && this.parser.satisfied(currentState)
   }
 
-  read(): ReadonlyArray<ParserValue<P>> | undefined {
+  read(): RangeValue<P, Min, Max> | undefined {
     if (!this.parser.satisfied(currentState) && this.#hasConsumed) {
       return undefined
     }
@@ -278,7 +290,7 @@ export class Range<
       return undefined
     }
 
-    return result
+    return result as RangeValue<P, Min, Max>
   }
 
   reset(): void {
@@ -288,7 +300,7 @@ export class Range<
     this.#hasConsumed = false
   }
 
-  override toString(): string {
+  toString(): string {
     let modifier =
       this.maxLength !== false
         ? this.minLength === this.maxLength

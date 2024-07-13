@@ -1,5 +1,11 @@
 # valued
 
+## 0.3.2
+
+### Patch Changes
+
+- d2af0e0: improve types for combinators and improve type performance slightly for multipliers where the `Input` type could immediately be set to `string`
+
 ## 0.3.1
 
 ### Patch Changes

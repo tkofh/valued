@@ -1,25 +1,28 @@
-import { type Token, tokenize } from './tokenizer'
+import type { Token } from './tokenizer'
 
 export const initialState = 0
 export const currentState = 1
 
 export type ParserState = 0 | 1
 
-export interface Parser<V, I extends string> {
+declare const ParserValueBrand: unique symbol
+declare const ParserInputBrand: unique symbol
+
+export interface InternalParser<V> {
   satisfied(state: ParserState): boolean
   feed(token: Token): boolean
   check(token: Token, state: ParserState): boolean
   read(): V | undefined
   reset(): void
   toString(): string
-  parse(input: I): ParseResult<V>
+}
+
+export interface Parser<V, I extends string> extends InternalParser<V> {
+  [ParserValueBrand]: V
+  [ParserInputBrand]: I
 }
 
 export type AnyParser = Parser<unknown, string>
-
-export type ParserInput<T> = T extends Parser<unknown, infer I> ? I : never
-
-export type ParserValue<T> = T extends Parser<infer V, string> ? V : never
 
 export type ParseResult<T> =
   | {
@@ -38,30 +41,38 @@ export function invalid<T>(): ParseResult<T> {
   return _invalid
 }
 
-export abstract class BaseParser<V, I extends string>
-  implements Pick<Parser<V, I>, 'feed' | 'reset' | 'read'>
-{
-  parse(input: I): ParseResult<V> {
-    try {
-      for (const token of tokenize(input)) {
-        if (!this.feed(token)) {
-          return invalid()
-        }
-      }
+// export abstract class BaseParser<V, I extends string>
+//   implements Pick<Parser<V, I>, 'feed' | 'reset' | 'read'>
+// {
+//   parse(input: I): ParseResult<V> {
+//     try {
+//       for (const token of tokenize(input)) {
+//         if (!this.feed(token)) {
+//           return invalid()
+//         }
+//       }
+//
+//       const parsed = this.read()
+//
+//       if (parsed === undefined) {
+//         return invalid()
+//       }
+//
+//       return valid(parsed as V)
+//     } finally {
+//       this.reset()
+//     }
+//   }
+//
+//   abstract read(): V | undefined
+//   abstract feed(token: Token): boolean
+//   abstract reset(): void
+// }
 
-      const parsed = this.read()
+export type ParserInput<T extends Parser<unknown, string>> =
+  T[typeof ParserInputBrand]
+// T extends Parser<unknown, infer I> ? I : never
 
-      if (parsed === undefined) {
-        return invalid()
-      }
-
-      return valid(parsed as V)
-    } finally {
-      this.reset()
-    }
-  }
-
-  abstract read(): V | undefined
-  abstract feed(token: Token): boolean
-  abstract reset(): void
-}
+export type ParserValue<T extends Parser<unknown, string>> =
+  T[typeof ParserValueBrand]
+// T extends Parser<infer V, unknown> ? V : never
