@@ -1,4 +1,4 @@
-import type { AnyParser, Parser, ParserInput } from '../parser'
+import type { Parser } from '../parser'
 
 type FilterElement<T, P> = T extends P ? [T] : []
 
@@ -16,12 +16,12 @@ export type ExtractParserValues<P extends ReadonlyArray<unknown>, T = never> = {
 }
 
 export type ExtractParserInputs<
-  P extends ReadonlyArray<unknown>,
-  C extends string = never,
+  Parsers extends ReadonlyArray<unknown>,
+  Constant extends string = never,
 > = {
-  [K in keyof P]: P[K] extends AnyParser
-    ? ParserInput<P[K]>
-    : P[K] extends C
-      ? P[K]
+  [K in keyof Parsers]: Parsers[K] extends Parser<unknown, infer I>
+    ? I
+    : Parsers[K] extends Constant
+      ? Parsers[K]
       : never
 }

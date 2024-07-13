@@ -5,7 +5,8 @@ class OneOrMore<P extends AnyParser, C extends boolean> extends Range<
   P,
   C,
   1,
-  number
+  number,
+  string
 > {
   constructor(parser: P, commaSeparated: C) {
     super(parser, 1, false, commaSeparated)

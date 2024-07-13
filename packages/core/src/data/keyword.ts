@@ -88,14 +88,14 @@ class KeywordParser<Value extends string>
 
 export type { KeywordParser, KeywordValue }
 
-export function keyword<Value extends string>(
+export function keyword<const Value extends string>(
   value: Value,
 ): KeywordParser<Value> {
   return new KeywordParser(new Set([value]))
 }
 
-export function keywords<Value extends string>(
-  values: ReadonlyArray<Value>,
-): KeywordParser<Value> {
+export function keywords<const Values extends ReadonlyArray<string>>(
+  values: Values,
+): KeywordParser<Values[number]> {
   return new KeywordParser(new Set(values))
 }
