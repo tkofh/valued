@@ -1,5 +1,12 @@
 # valued
 
+## 0.4.2
+
+### Patch Changes
+
+- 28d2000: filter out `never` values from juxtapose value
+- 28d2000: add dedicated ratio value
+
 ## 0.4.1
 
 ### Patch Changes
