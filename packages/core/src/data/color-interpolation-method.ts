@@ -1,28 +1,23 @@
 import { juxtapose, oneOf } from '../combinators'
 import { optional } from '../multipliers'
 import { hueInterpolationMethod } from './hue-interpolation-method'
-import { keyword } from './keyword'
+import { keywords } from './keyword'
 
-const rectangularColorSpace = oneOf([
-  keyword('srgb'),
-  keyword('srgb-linear'),
-  keyword('display-p3'),
-  keyword('a98-rgb'),
-  keyword('prophoto-rgb'),
-  keyword('rec-2020'),
-  keyword('lab'),
-  keyword('oklab'),
-  keyword('xyz'),
-  keyword('xyz-d50'),
-  keyword('xyz-d65'),
+const rectangularColorSpace = keywords([
+  'srgb',
+  'srgb-linear',
+  'display-p3',
+  'a98-rgb',
+  'prophoto-rgb',
+  'rec-2020',
+  'lab',
+  'oklab',
+  'xyz',
+  'xyz-d50',
+  'xyz-d65',
 ])
 
-const polarColorSpace = oneOf([
-  keyword('hsl'),
-  keyword('hwb'),
-  keyword('lch'),
-  keyword('oklch'),
-])
+const polarColorSpace = keywords(['hsl', 'hwb', 'lch', 'oklch'])
 
 export const colorInterpolationMethod = juxtapose([
   'in',

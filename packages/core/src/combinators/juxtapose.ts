@@ -4,12 +4,13 @@ import {
   type Parser,
   type ParserInput,
   type ParserState,
+  type ParserValue,
   currentState,
   initialState,
 } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
-import type { FilterStrings } from './types'
+// import type { FilterStrings } from './types'
 
 type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
   ? ''
@@ -55,16 +56,29 @@ type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
                   ? `${T[0]} ${T[1]} ${T[2]} ${T[3]} ${T[4]} ${T[5]} ${T[6]} ${T[7]}`
                   : string
 
-type Extract<Parsers extends ReadonlyArray<AnyParser | string>> = {
-  [K in keyof Parsers]: Parsers[K] extends Parser<unknown, infer I>
-    ? I
-    : Parsers[K] extends string
-      ? Parsers[K]
-      : never
-}
+// type Extract<Parsers extends ReadonlyArray<AnyParser | string>> = {
+//   [K in keyof Parsers]: Parsers[K] extends Parser<unknown, infer I>
+//     ? I
+//     : Parsers[K] extends string
+//       ? Parsers[K]
+//       : never
+// }
+
+type JuxtaposeItemValue<Item extends AnyParser | string> =
+  Item extends AnyParser ? ParserValue<Item> : never
+
+export type InternalJuxtaposeValue<
+  Parsers extends ReadonlyArray<AnyParser | string>,
+  Values extends ReadonlyArray<unknown> = [],
+> = Values['length'] extends Parsers['length']
+  ? Values
+  : InternalJuxtaposeValue<
+      Parsers,
+      [...Values, JuxtaposeItemValue<Parsers[Values['length']]>]
+    >
 
 export type JuxtaposeValue<Parsers extends ReadonlyArray<AnyParser | string>> =
-  FilterStrings<Extract<Parsers>>
+  InternalJuxtaposeValue<Parsers>
 
 type JuxtaposeItemInput<Parser extends AnyParser | string> =
   Parser extends AnyParser
@@ -144,7 +158,7 @@ class Juxtapose<const Parsers extends ReadonlyArray<AnyParser | string>>
   }
 
   read(): JuxtaposeValue<Parsers> | undefined {
-    const result = [] as JuxtaposeValue<Parsers>
+    const result = [] as Array<unknown>
 
     for (const parser of this.structure) {
       if (typeof parser !== 'string') {
@@ -158,7 +172,7 @@ class Juxtapose<const Parsers extends ReadonlyArray<AnyParser | string>>
       }
     }
 
-    return result
+    return result as JuxtaposeValue<Parsers>
   }
 
   reset(): void {

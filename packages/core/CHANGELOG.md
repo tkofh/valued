@@ -1,5 +1,12 @@
 # valued
 
+## 0.4.0
+
+### Minor Changes
+
+- overhaul value and input types
+- remove `parse()` method from `Parser` interface
+
 ## 0.3.2
 
 ### Patch Changes
