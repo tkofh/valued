@@ -56,13 +56,14 @@ type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
                   ? `${T[0]} ${T[1]} ${T[2]} ${T[3]} ${T[4]} ${T[5]} ${T[6]} ${T[7]}`
                   : string
 
-// type Extract<Parsers extends ReadonlyArray<AnyParser | string>> = {
-//   [K in keyof Parsers]: Parsers[K] extends Parser<unknown, infer I>
-//     ? I
-//     : Parsers[K] extends string
-//       ? Parsers[K]
-//       : never
-// }
+type FilterNever<T extends ReadonlyArray<unknown>> = T extends [
+  infer First,
+  ...infer Rest,
+]
+  ? [First] extends [never]
+    ? FilterNever<Rest>
+    : [First, ...FilterNever<Rest>]
+  : []
 
 type JuxtaposeItemValue<Item extends AnyParser | string> =
   Item extends AnyParser ? ParserValue<Item> : never
@@ -71,7 +72,7 @@ export type InternalJuxtaposeValue<
   Parsers extends ReadonlyArray<AnyParser | string>,
   Values extends ReadonlyArray<unknown> = [],
 > = Values['length'] extends Parsers['length']
-  ? Values
+  ? FilterNever<Values>
   : InternalJuxtaposeValue<
       Parsers,
       [...Values, JuxtaposeItemValue<Parsers[Values['length']]>]

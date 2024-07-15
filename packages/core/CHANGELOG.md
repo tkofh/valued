@@ -1,5 +1,11 @@
 # valued
 
+## 0.4.1
+
+### Patch Changes
+
+- fix juxtapose value type
+
 ## 0.4.0
 
 ### Minor Changes
