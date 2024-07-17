@@ -1,5 +1,5 @@
-import { juxtapose } from '../combinators'
-import { optional } from '../multipliers'
+import { juxtapose } from '../combinators/juxtapose'
+import { optional } from '../multipliers/optional'
 import type { InternalParser, Parser, ParserState } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'

@@ -1,5 +1,6 @@
-import { juxtapose, oneOf } from '../combinators'
-import { optional } from '../multipliers'
+import { juxtapose } from '../combinators/juxtapose'
+import { oneOf } from '../combinators/oneOf'
+import { optional } from '../multipliers/optional'
 import { hueInterpolationMethod } from './hue-interpolation-method'
 import { keywords } from './keyword'
 

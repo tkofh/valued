@@ -1,10 +1,9 @@
-import { oneOf } from '../combinators'
-import { keyword } from './keyword'
+import { keywords } from './keyword'
 
-export const overflow = oneOf([
-  keyword('visible'),
-  keyword('hidden'),
-  keyword('clip'),
-  keyword('scroll'),
-  keyword('auto'),
+export const overflow = keywords([
+  'visible',
+  'hidden',
+  'clip',
+  'scroll',
+  'auto',
 ])

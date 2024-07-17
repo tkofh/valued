@@ -1,13 +1,7 @@
 import { juxtapose } from '../combinators/juxtapose'
-import { oneOf } from '../combinators/oneOf'
-import { keyword } from './keyword'
+import { keywords } from './keyword'
 
 export const hueInterpolationMethod = juxtapose([
-  oneOf([
-    keyword('shorter'),
-    keyword('longer'),
-    keyword('increasing'),
-    keyword('decreasing'),
-  ]),
+  keywords(['shorter', 'longer', 'increasing', 'decreasing']),
   'hue',
 ])

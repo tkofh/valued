@@ -1,4 +1,6 @@
-import { allOf, juxtapose, oneOf } from '../combinators'
+import { allOf } from '../combinators/allOf'
+import { juxtapose } from '../combinators/juxtapose'
+import { oneOf } from '../combinators/oneOf'
 import { keywords } from './keyword'
 import { lengthPercentage } from './length-percentage'
 

@@ -1,15 +1,14 @@
-import { oneOf } from '../combinators'
-import { keyword } from './keyword'
+import { keywords } from './keyword'
 
-export const lineStyle = oneOf([
-  keyword('none'),
-  keyword('hidden'),
-  keyword('dotted'),
-  keyword('dashed'),
-  keyword('solid'),
-  keyword('double'),
-  keyword('groove'),
-  keyword('ridge'),
-  keyword('inset'),
-  keyword('outset'),
+export const lineStyle = keywords([
+  'none',
+  'hidden',
+  'dotted',
+  'dashed',
+  'solid',
+  'double',
+  'groove',
+  'ridge',
+  'inset',
+  'outset',
 ])

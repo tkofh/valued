@@ -1,21 +1,20 @@
-import { oneOf } from '../combinators'
-import { keyword } from './keyword'
+import { keywords } from './keyword'
 
-export const blendMode = oneOf([
-  keyword('normal'),
-  keyword('multiply'),
-  keyword('screen'),
-  keyword('overlay'),
-  keyword('darken'),
-  keyword('lighten'),
-  keyword('color-dodge'),
-  keyword('color-burn'),
-  keyword('hard-light'),
-  keyword('soft-light'),
-  keyword('difference'),
-  keyword('exclusion'),
-  keyword('hue'),
-  keyword('saturation'),
-  keyword('color'),
-  keyword('luminosity'),
+export const blendMode = keywords([
+  'normal',
+  'multiply',
+  'screen',
+  'overlay',
+  'darken',
+  'lighten',
+  'color-dodge',
+  'color-burn',
+  'hard-light',
+  'soft-light',
+  'difference',
+  'exclusion',
+  'hue',
+  'saturation',
+  'color',
+  'luminosity',
 ])

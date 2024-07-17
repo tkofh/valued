@@ -65,7 +65,7 @@ type InternalSomeOfValue<
   ? Values
   : InternalSomeOfValue<
       Parsers,
-      [...Values, ParserValue<Parsers[Values['length']]>]
+      [...Values, ParserValue<Parsers[Values['length']]> | null]
     >
 
 export type SomeOfValue<Parsers extends ReadonlyArray<AnyParser>> =

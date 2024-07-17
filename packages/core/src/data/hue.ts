@@ -1,4 +1,4 @@
-import { oneOf } from '../combinators'
+import { oneOf } from '../combinators/oneOf'
 import { angle } from './angle'
 import { number } from './number'
 

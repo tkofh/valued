@@ -1,4 +1,3 @@
-import { oneOf } from '../combinators'
-import { keyword } from './keyword'
+import { keywords } from './keyword'
 
-export const relativeSize = oneOf([keyword('smaller'), keyword('larger')])
+export const relativeSize = keywords(['smaller', 'larger'])

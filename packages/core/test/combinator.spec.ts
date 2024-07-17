@@ -5,7 +5,7 @@ import { oneOf } from '../src/combinators/oneOf'
 import { someOf } from '../src/combinators/someOf'
 import { dimension, dimensionValue } from '../src/data/dimension'
 import { keyword, keywordValue } from '../src/data/keyword'
-import { optional } from '../src/multipliers'
+import { optional } from '../src/multipliers/optional'
 import { parse } from '../src/parse'
 import { invalid, valid } from '../src/parser'
 
