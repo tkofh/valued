@@ -1,3 +1,3 @@
 import { keywords } from './keyword'
 
-export const relativeSize = keywords(['smaller', 'larger'])
+export const relativeSize = () => keywords(['smaller', 'larger'])

@@ -186,7 +186,7 @@ describe('position', () => {
 
   for (const [input, output] of validCases) {
     test(`treats \`${input}\` as valid`, () => {
-      expect(parse(input, position)).toEqual(valid(output))
+      expect(parse(input, position())).toEqual(valid(output))
     })
   }
 })

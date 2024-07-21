@@ -1,5 +1,11 @@
 # valued
 
+## 0.4.6
+
+### Patch Changes
+
+- f5d3298: fix number parsing in lists
+
 ## 0.4.5
 
 ### Patch Changes
