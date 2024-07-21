@@ -81,3 +81,14 @@ export function tokenize(input: string): IterableIterator<Token> {
   const chunks = inputToChunks(input)
   return chunksToAst(chunks)
 }
+
+export function stringify(input: Token): string {
+  switch (input.type) {
+    case 'literal':
+      return input.value
+    case 'parenthetical':
+      return `(${input.tokens.map(stringify).join(' ')})`
+    case 'function':
+      return `${input.name}(${input.args.map(stringify).join(' ')})`
+  }
+}

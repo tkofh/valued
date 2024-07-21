@@ -73,6 +73,10 @@ describe('color', () => {
     ['#0000', valid(colorValue('#0000'))],
     ['#000000', valid(colorValue('#000000'))],
     ['#00000000', valid(colorValue('#00000000'))],
+    [
+      'rgb(255 0 0 / 44.137931034482754%)',
+      valid(colorValue('rgb(255 0 0 / 44.137931034482754%)')),
+    ],
     ['#00000', invalid()],
   ] as const
 

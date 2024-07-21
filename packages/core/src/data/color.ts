@@ -1,4 +1,22 @@
-import Color from 'colorjs.io'
+import {
+  type ColorObject,
+  ColorSpace,
+  HSL,
+  HSV,
+  HWB,
+  LCH,
+  Lab,
+  OKLCH,
+  OKLab,
+  P3,
+  P3_Linear,
+  XYZ_D50,
+  XYZ_D65,
+  parse,
+  sRGB,
+  sRGB_Linear,
+  serialize,
+} from 'colorjs.io/fn'
 import {
   type InternalParser,
   type Parser,
@@ -6,17 +24,35 @@ import {
   currentState,
 } from '../parser'
 import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
+import { type Token, stringify } from '../tokenizer'
+
+ColorSpace.register(XYZ_D65)
+ColorSpace.register(sRGB_Linear)
+ColorSpace.register(sRGB)
+ColorSpace.register(HSL)
+ColorSpace.register(HSV)
+ColorSpace.register(HWB)
+ColorSpace.register(OKLab)
+ColorSpace.register(OKLCH)
+ColorSpace.register(P3_Linear)
+ColorSpace.register(P3)
+ColorSpace.register(XYZ_D50)
+ColorSpace.register(Lab)
+ColorSpace.register(LCH)
 
 const TypeBrand: unique symbol = Symbol('data/color')
 
 class ColorValue {
   readonly [TypeBrand] = TypeBrand
 
-  readonly value: Color
+  readonly value: ColorObject
 
   constructor(value: string) {
-    this.value = new Color(value)
+    this.value = parse(value)
+  }
+
+  serialize(format: string): string {
+    return serialize(this.value, { format })
   }
 }
 
@@ -42,6 +78,15 @@ class ColorParser implements InternalParser<ColorValue> {
   feed(token: Token): boolean {
     if (token.type === 'literal') {
       const value = colorValue(token.value)
+
+      if (value !== false) {
+        this.#value = value
+        return true
+      }
+    }
+
+    if (token.type === 'function') {
+      const value = colorValue(stringify(token))
 
       if (value !== false) {
         this.#value = value

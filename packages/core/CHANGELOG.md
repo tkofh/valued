@@ -1,5 +1,12 @@
 # valued
 
+## 0.4.4
+
+### Patch Changes
+
+- separate imports for all multipliers and combinators to help with type portability
+- fix value type for `someOf` to include `null` as an option for each parser
+
 ## 0.4.3
 
 ### Patch Changes
