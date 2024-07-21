@@ -53,7 +53,7 @@ export class InternalNumberParser<Value> implements InternalParser<Value> {
   }
 
   feed(token: Token): boolean {
-    if (token.type === 'literal') {
+    if (token.type === 'literal' && this.#value === null) {
       const value = parseNumericInput(token.value, this.#min, this.#max)
 
       if (value !== false && this.checkNumberValue(value)) {

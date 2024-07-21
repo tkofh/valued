@@ -3,7 +3,13 @@ import { allOf } from '../src/combinators/allOf'
 import { juxtapose } from '../src/combinators/juxtapose'
 import { oneOf } from '../src/combinators/oneOf'
 import { someOf } from '../src/combinators/someOf'
-import { keyword, keywordValue } from '../src/data/keyword'
+import { color, colorValue } from '../src/data/color'
+import { keyword, keywordValue, keywords } from '../src/data/keyword'
+import {
+  lengthPercentage,
+  lengthPercentageValue,
+} from '../src/data/length-percentage'
+import { number, numberValue } from '../src/data/number'
 import { oneOrMore } from '../src/multipliers/oneOrMore'
 import { optional } from '../src/multipliers/optional'
 import { zeroOrMore } from '../src/multipliers/zeroOrMore'
@@ -488,6 +494,72 @@ describe('oneOrMore', () => {
     test('treats `foo bar baz` as invalid for `foo+ bar`', () => {
       expect(parse('foo bar baz', parser)).toEqual(invalid())
     })
+  })
+
+  describe('within juxtapose with optional peer', () => {
+    const parser = juxtapose([
+      oneOrMore(keyword('foo')),
+      optional(keyword('bar')),
+    ])
+
+    test('treats `bar` as invalid for `foo+ bar?`', () => {
+      expect(parse('bar', parser)).toEqual(invalid())
+    })
+
+    test('treats `foo bar` as valid for `foo+ bar?`', () => {
+      expect(parse('foo bar', parser)).toEqual(
+        valid([[keywordValue('foo')], keywordValue('bar')]),
+      )
+    })
+
+    test('treats `foo foo bar` as valid for `foo+ bar?`', () => {
+      expect(parse('foo foo bar', parser)).toEqual(
+        valid([
+          [keywordValue('foo'), keywordValue('foo')],
+          keywordValue('bar'),
+        ]),
+      )
+    })
+
+    test('treats `foo foo foo` as valid for `foo+ bar?`', () => {
+      expect(parse('foo foo foo', parser)).toEqual(
+        valid([
+          [keywordValue('foo'), keywordValue('foo'), keywordValue('foo')],
+          null,
+        ]),
+      )
+    })
+  })
+
+  test('very weird case', () => {
+    const parser = someOf([
+      color(),
+      lengthPercentage(),
+      juxtapose([
+        'join',
+        keywords(['arcs', 'bevel', 'miter', 'miter-clip', 'round']),
+        optional(number({ min: 1 })),
+      ]),
+      juxtapose(['cap', keywords(['butt', 'round', 'square'])]),
+      oneOf([
+        keyword('solid'),
+        juxtapose([
+          'dashed',
+          oneOrMore(number()),
+          optional(juxtapose(['offset', number()])),
+        ]),
+      ]),
+    ])
+
+    expect(parse('10px black dashed 10 10', parser)).toEqual(
+      valid([
+        colorValue('black'),
+        lengthPercentageValue(10, 'px'),
+        null,
+        null,
+        [[numberValue(10), numberValue(10)], null],
+      ]),
+    )
   })
 
   describe('within oneOf', () => {

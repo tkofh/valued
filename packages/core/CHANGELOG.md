@@ -1,5 +1,11 @@
 # valued
 
+## 0.4.5
+
+### Patch Changes
+
+- 820316c: fix parsing bug for colors
+
 ## 0.4.4
 
 ### Patch Changes

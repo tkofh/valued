@@ -41,34 +41,6 @@ export function invalid<T>(): ParseResult<T> {
   return _invalid
 }
 
-// export abstract class BaseParser<V, I extends string>
-//   implements Pick<Parser<V, I>, 'feed' | 'reset' | 'read'>
-// {
-//   parse(input: I): ParseResult<V> {
-//     try {
-//       for (const token of tokenize(input)) {
-//         if (!this.feed(token)) {
-//           return invalid()
-//         }
-//       }
-//
-//       const parsed = this.read()
-//
-//       if (parsed === undefined) {
-//         return invalid()
-//       }
-//
-//       return valid(parsed as V)
-//     } finally {
-//       this.reset()
-//     }
-//   }
-//
-//   abstract read(): V | undefined
-//   abstract feed(token: Token): boolean
-//   abstract reset(): void
-// }
-
 export type ParserInput<T extends Parser<unknown, string>> =
   T[typeof ParserInputBrand]
 // T extends Parser<unknown, infer I> ? I : never
