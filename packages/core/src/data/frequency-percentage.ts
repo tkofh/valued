@@ -33,6 +33,10 @@ class FrequencyPercentageValue
     this.value = value
     this.unit = unit
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function frequencyPercentageValue(

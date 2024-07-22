@@ -35,6 +35,10 @@ class RatioValue {
   heightToWidth(height: number): number {
     return height / this.value
   }
+
+  toString(): string {
+    return `${this.numerator}/${this.denominator}`
+  }
 }
 
 export type { RatioValue }

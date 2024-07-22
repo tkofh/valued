@@ -77,6 +77,10 @@ class LengthValue<Unit extends LengthUnit>
     this.value = value
     this.unit = unit
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function lengthValue<Unit extends LengthUnit>(

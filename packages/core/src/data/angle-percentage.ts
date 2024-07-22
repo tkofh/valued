@@ -45,6 +45,10 @@ class AnglePercentageValue
 
     this.normalized = value / denominator
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function anglePercentageValue(

@@ -79,6 +79,10 @@ class LengthPercentageValue<Unit extends LengthPercentageUnit>
     this.value = value
     this.unit = unit
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function lengthPercentageValue<Unit extends LengthPercentageUnit>(

@@ -25,6 +25,10 @@ class FrequencyValue implements InternalDimensionValue<FrequencyUnit> {
     this.value = value
     this.unit = unit
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function frequencyValue(

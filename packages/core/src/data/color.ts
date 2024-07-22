@@ -54,6 +54,10 @@ class ColorValue {
   serialize(format: string): string {
     return serialize(this.value, { format })
   }
+
+  toString(): string {
+    return this.serialize('color')
+  }
 }
 
 export function colorValue(value: string): ColorValue | false {

@@ -1,5 +1,11 @@
 # valued
 
+## 0.4.7
+
+### Patch Changes
+
+- 489bf01: convert all data types to functions
+
 ## 0.4.6
 
 ### Patch Changes

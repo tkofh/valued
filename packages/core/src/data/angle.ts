@@ -41,6 +41,10 @@ class AngleValue implements InternalDimensionValue<AngleUnit> {
 
     this.normalized = value / denominator
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function angleValue(value: number, unit: AngleUnit): AngleValue {

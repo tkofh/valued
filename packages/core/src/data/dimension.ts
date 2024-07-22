@@ -28,6 +28,10 @@ class DimensionValue<Unit extends string>
     this.value = value
     this.unit = unit
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function dimensionValue<Unit extends string>(

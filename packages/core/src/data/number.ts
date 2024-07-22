@@ -17,6 +17,10 @@ class NumberValue {
   constructor(value: number) {
     this.value = value
   }
+
+  toString(): string {
+    return `${this.value}`
+  }
 }
 
 export function numberValue(value: number): NumberValue {

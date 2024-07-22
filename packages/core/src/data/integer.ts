@@ -14,6 +14,10 @@ class IntegerValue {
   constructor(value: number) {
     this.value = value
   }
+
+  toString(): string {
+    return `${this.value}`
+  }
 }
 
 export function integerValue(value: number): IntegerValue {

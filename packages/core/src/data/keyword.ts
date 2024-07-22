@@ -18,6 +18,10 @@ class KeywordValue<Value extends string> {
   constructor(value: Value) {
     this.value = value
   }
+
+  toString(): string {
+    return this.value
+  }
 }
 
 export function keywordValue<Value extends string>(

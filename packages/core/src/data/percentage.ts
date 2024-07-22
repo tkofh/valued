@@ -25,6 +25,10 @@ class PercentageValue implements InternalDimensionValue<PercentageUnit> {
     this.value = value
     this.unit = '%'
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function percentageValue(value: number): PercentageValue {

@@ -24,6 +24,10 @@ class FlexValue implements InternalDimensionValue<FlexUnit> {
     this.value = value
     this.unit = unit
   }
+
+  toString(): string {
+    return `${this.value}${this.unit}`
+  }
 }
 
 export function flexValue(value: number, unit: FlexUnit): FlexValue {
