@@ -90,9 +90,9 @@ function isSomeOf(value: unknown): value is SomeOf<ReadonlyArray<AnyParser>> {
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class SomeOf<const Parsers extends ReadonlyArray<AnyParser>>
-  implements InternalParser<SomeOfValue<Parsers>>
-{
+class SomeOf<
+  const Parsers extends ReadonlyArray<AnyParser>,
+> implements InternalParser<SomeOfValue<Parsers>> {
   readonly [TypeBrand] = TypeBrand
   readonly parsers: ReadonlySet<AnyParser>
 

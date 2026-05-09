@@ -24,9 +24,7 @@ type AnglePercentageUnit = ValuesOfSet<AnglePercentageUnits>
 
 export type AnglePercentageInput = `${number}${AnglePercentageUnit}`
 
-class AnglePercentageValue
-  implements InternalDimensionValue<AnglePercentageUnit>
-{
+class AnglePercentageValue implements InternalDimensionValue<AnglePercentageUnit> {
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number

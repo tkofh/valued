@@ -110,9 +110,9 @@ function isJuxtapose(
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class Juxtapose<const Parsers extends ReadonlyArray<AnyParser | string>>
-  implements InternalParser<JuxtaposeValue<Parsers>>
-{
+class Juxtapose<
+  const Parsers extends ReadonlyArray<AnyParser | string>,
+> implements InternalParser<JuxtaposeValue<Parsers>> {
   readonly [TypeBrand] = TypeBrand
   readonly structure: ReadonlyArray<AnyParser | string>
 

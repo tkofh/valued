@@ -36,9 +36,9 @@ export function isKeywordValue<Value extends string>(
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class KeywordParser<Value extends string>
-  implements InternalParser<KeywordValue<Value>>
-{
+class KeywordParser<Value extends string> implements InternalParser<
+  KeywordValue<Value>
+> {
   readonly keywords: ReadonlySet<Value>
 
   #value: KeywordValue<Value> | null = null

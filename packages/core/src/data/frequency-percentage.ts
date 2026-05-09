@@ -21,9 +21,7 @@ type FrequencyPercentageUnit = ValuesOfSet<FrequencyPercentageUnits>
 
 export type FrequencyPercentageInput = `${number}${FrequencyPercentageUnit}`
 
-class FrequencyPercentageValue
-  implements InternalDimensionValue<FrequencyPercentageUnit>
-{
+class FrequencyPercentageValue implements InternalDimensionValue<FrequencyPercentageUnit> {
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number

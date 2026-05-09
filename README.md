@@ -4,7 +4,7 @@
 
 ```ts
 // border: <line-width> || <line-style> || <color>
-const border = someOf([length(), lineStyle(), color()]);
+const border = someOf([length(), lineStyle(), color()])
 ```
 
 A `parse()` call against that combinator is typed in two directions:
@@ -25,15 +25,15 @@ npm install valued
 Build a parser, hand it (along with the input) to `parse()`. The result is a discriminated union: either `{ valid: false }` or `{ valid: true, value }`.
 
 ```ts
-import { parse } from "valued";
-import { length } from "valued/data/length";
+import { parse } from 'valued'
+import { length } from 'valued/data/length'
 
-const parser = length();
-const result = parse("12px", parser);
+const parser = length()
+const result = parse('12px', parser)
 
 if (result.valid) {
-  result.value.value; // 12
-  result.value.unit; // 'px'
+  result.value.value // 12
+  result.value.unit // 'px'
 }
 ```
 
@@ -47,10 +47,10 @@ Exactly one of the alternatives matches.
 
 ```ts
 // auto | <length>
-const widthish = oneOf([keyword("auto"), length()]);
+const widthish = oneOf([keyword('auto'), length()])
 
-parse("auto", widthish); // KeywordValue<'auto'>
-parse("12px", widthish); // LengthValue<'px'>
+parse('auto', widthish) // KeywordValue<'auto'>
+parse('12px', widthish) // LengthValue<'px'>
 ```
 
 ### `juxtapose` — sequence
@@ -59,18 +59,18 @@ A sequence of parsers (and optional string literals), in order, separated by spa
 
 ```ts
 // <length> <length>
-const point = juxtapose([length(), length()]);
+const point = juxtapose([length(), length()])
 
-parse("10px 20px", point); // [LengthValue, LengthValue]
+parse('10px 20px', point) // [LengthValue, LengthValue]
 ```
 
 String literals participate in the input but drop out of the output:
 
 ```ts
 // <length> / <length>
-const ratio = juxtapose([length(), "/", length()]);
+const ratio = juxtapose([length(), '/', length()])
 
-parse("16px / 24px", ratio); // [LengthValue, LengthValue]
+parse('16px / 24px', ratio) // [LengthValue, LengthValue]
 ```
 
 ### `allOf` — `&&`
@@ -79,10 +79,10 @@ Every parser must match, in any order.
 
 ```ts
 // <color> && <length>
-const colorAndLength = allOf([color(), length()]);
+const colorAndLength = allOf([color(), length()])
 
-parse("red 12px", colorAndLength); // [ColorValue, LengthValue]
-parse("12px red", colorAndLength); // [ColorValue, LengthValue]
+parse('red 12px', colorAndLength) // [ColorValue, LengthValue]
+parse('12px red', colorAndLength) // [ColorValue, LengthValue]
 ```
 
 ### `someOf` — `||`
@@ -91,12 +91,12 @@ At least one parser must match. Any can be omitted; any order.
 
 ```ts
 // <line-width> || <line-style> || <color>
-const border = someOf([length(), lineStyle(), color()]);
+const border = someOf([length(), lineStyle(), color()])
 
-parse("1px solid red", border); // [LengthValue, LineStyleValue, ColorValue]
-parse("solid red", border); // [null, LineStyleValue, ColorValue]
-parse("solid", border); // [null, LineStyleValue, null]
-parse("red", border); // [null, null, ColorValue]
+parse('1px solid red', border) // [LengthValue, LineStyleValue, ColorValue]
+parse('solid red', border) // [null, LineStyleValue, ColorValue]
+parse('solid', border) // [null, LineStyleValue, null]
+parse('red', border) // [null, null, ColorValue]
 ```
 
 ## Multipliers
@@ -104,21 +104,21 @@ parse("red", border); // [null, null, ColorValue]
 Multipliers wrap a parser and let it match repeatedly.
 
 ```ts
-optional(parser); // <parser>?
-oneOrMore(parser); // <parser>+
-zeroOrMore(parser); // <parser>*
-exactly(parser, n); // <parser>{n}
-between(parser, { minLength, maxLength }); // <parser>{n,m}
+optional(parser) // <parser>?
+oneOrMore(parser) // <parser>+
+zeroOrMore(parser) // <parser>*
+exactly(parser, n) // <parser>{n}
+between(parser, { minLength, maxLength }) // <parser>{n,m}
 ```
 
 `oneOrMore` and `between` accept a `commaSeparated: true` option for the `#` variants from the spec.
 
 ```ts
 // padding: <length>{1,4}
-const padding = between(length(), { minLength: 1, maxLength: 4 });
+const padding = between(length(), { minLength: 1, maxLength: 4 })
 
-parse("10px", padding); // [LengthValue]
-parse("10px 20px 10px 20px", padding); // [LengthValue, LengthValue, LengthValue, LengthValue]
+parse('10px', padding) // [LengthValue]
+parse('10px 20px 10px 20px', padding) // [LengthValue, LengthValue, LengthValue, LengthValue]
 ```
 
 ## Data types
@@ -157,25 +157,25 @@ Each data type lives at its own subpath so you only pay for what you import.
 Numeric data types accept `min` / `max` (or `minValue` / `maxValue` for dimensions) to constrain the accepted range. `length`, `angle`, `frequency`, etc. expose a `.subset([...])` helper for restricting the accepted units.
 
 ```ts
-length({ minValue: 0 }); // non-negative
-length.subset(["px", "rem"]); // px or rem only
-number({ min: 0, max: 1 }); // 0..1
-keywords(["start", "end", "center"]); // a fixed set
+length({ minValue: 0 }) // non-negative
+length.subset(['px', 'rem']) // px or rem only
+number({ min: 0, max: 1 }) // 0..1
+keywords(['start', 'end', 'center']) // a fixed set
 ```
 
 ## Result and types
 
 ```ts
-type ParseResult<T> = { valid: false } | { valid: true; value: T };
+type ParseResult<T> = { valid: false } | { valid: true; value: T }
 ```
 
 `parse()` accepts a parser of any input/output type and returns its `ParseResult`. The type helpers `ParserInput<P>` and `ParserValue<P>` extract the input and output types of a parser if you want to expose them on a public API.
 
 ```ts
-import type { ParserInput, ParserValue } from "valued";
+import type { ParserInput, ParserValue } from 'valued'
 
-type BorderInput = ParserInput<typeof border>;
-type BorderValue = ParserValue<typeof border>;
+type BorderInput = ParserInput<typeof border>
+type BorderValue = ParserValue<typeof border>
 ```
 
 ## License

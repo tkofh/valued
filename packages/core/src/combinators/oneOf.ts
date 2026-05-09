@@ -17,9 +17,9 @@ export type OneOfValue<Parsers extends ReadonlyArray<AnyParser>> = ParserValue<
   Parsers[number]
 >
 
-class OneOf<const Parsers extends ReadonlyArray<AnyParser>>
-  implements InternalParser<ParserValue<Parsers[number]>>
-{
+class OneOf<
+  const Parsers extends ReadonlyArray<AnyParser>,
+> implements InternalParser<ParserValue<Parsers[number]>> {
   readonly parsers: ReadonlySet<AnyParser>
 
   #candidates: Set<AnyParser> = new Set()

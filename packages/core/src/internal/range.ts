@@ -171,8 +171,7 @@ export class Range<
   CommaSeparated extends boolean,
   Min extends number,
   Max extends number,
-> implements InternalParser<RangeValue<P, Min, Max>>
-{
+> implements InternalParser<RangeValue<P, Min, Max>> {
   readonly parser: P
   readonly minLength: number
   readonly maxLength: number | false

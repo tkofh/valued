@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "typescript/consistent-type-imports": "error",
+    "typescript/consistent-type-exports": "error",
+    "typescript/array-type": ["error", { "default": "generic" }],
+    "typescript/no-namespace": "error",
+    "import/no-default-export": "error",
+    "unicorn/filename-case": [
+      "error",
+      { "cases": { "camelCase": true, "kebabCase": true } }
+    ],
+    "no-unneeded-ternary": "error",
+    "curly": "error",
+    "oxc/approx-constant": "error"
+  },
+  "overrides": [
+    {
+      "files": ["*.config.ts", "*.config.mts", "*.config.mjs", "*.config.js"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
+  ],
+  "env": {
+    "builtin": true
+  }
+}

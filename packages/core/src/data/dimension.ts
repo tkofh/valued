@@ -13,9 +13,9 @@ export type DimensionInput<Unit extends string> = `${number}${Unit}`
 
 const TypeBrand: unique symbol = Symbol('data/dimension')
 
-class DimensionValue<Unit extends string>
-  implements InternalDimensionValue<Unit>
-{
+class DimensionValue<
+  Unit extends string,
+> implements InternalDimensionValue<Unit> {
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number

@@ -65,9 +65,9 @@ type LengthUnit = ValuesOfSet<LengthUnits>
 
 export type LengthInput<Unit extends string> = `${number}${Unit}`
 
-class LengthValue<Unit extends LengthUnit>
-  implements InternalDimensionValue<Unit>
-{
+class LengthValue<
+  Unit extends LengthUnit,
+> implements InternalDimensionValue<Unit> {
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number

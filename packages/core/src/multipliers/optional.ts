@@ -11,9 +11,9 @@ import type { Token } from '../tokenizer'
 export type OptionalValue<P extends AnyParser> = ParserValue<P> | null
 export type OptionalInput<P extends AnyParser> = ParserInput<P> | ''
 
-class Optional<const P extends AnyParser>
-  implements InternalParser<ParserValue<P> | null>
-{
+class Optional<
+  const P extends AnyParser,
+> implements InternalParser<ParserValue<P> | null> {
   readonly parser: P
 
   constructor(parser: P) {

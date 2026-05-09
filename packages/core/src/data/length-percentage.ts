@@ -67,9 +67,9 @@ type LengthPercentageUnit = ValuesOfSet<LengthPercentageUnits>
 export type LengthPercentageInput<Unit extends LengthPercentageUnit> =
   `${number}${Unit}`
 
-class LengthPercentageValue<Unit extends LengthPercentageUnit>
-  implements InternalDimensionValue<Unit>
-{
+class LengthPercentageValue<
+  Unit extends LengthPercentageUnit,
+> implements InternalDimensionValue<Unit> {
   readonly [TypeBrand] = TypeBrand
 
   readonly value: number

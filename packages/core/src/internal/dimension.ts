@@ -21,8 +21,7 @@ export class InternalDimensionParser<
   Units extends ReadonlySet<string>,
   Value extends InternalDimensionValue<Unit>,
   Unit extends ValuesOfSet<Units> = ValuesOfSet<Units>,
-> implements InternalParser<Value>
-{
+> implements InternalParser<Value> {
   readonly units: ReadonlySet<string>
 
   #value: Value | null = null

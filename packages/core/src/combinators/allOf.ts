@@ -72,9 +72,9 @@ function isAllOf(value: unknown): value is AllOf<ReadonlyArray<AnyParser>> {
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-class AllOf<const Parsers extends ReadonlyArray<AnyParser>>
-  implements InternalParser<AllOfValue<Parsers>>
-{
+class AllOf<
+  const Parsers extends ReadonlyArray<AnyParser>,
+> implements InternalParser<AllOfValue<Parsers>> {
   readonly [TypeBrand] = TypeBrand
   readonly parsers!: ReadonlySet<AnyParser>
 
