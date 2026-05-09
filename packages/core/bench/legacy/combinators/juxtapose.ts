@@ -1,12 +1,17 @@
 import {
   type AnyParser,
+  currentState,
   type InternalParser,
+  initialState,
   type Parser,
   type ParserInput,
+  type ParserState,
   type ParserValue,
 } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
+
+// import type { FilterStrings } from './types'
 
 type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
   ? ''
@@ -77,11 +82,12 @@ export type InternalJuxtaposeValue<
 export type JuxtaposeValue<Parsers extends ReadonlyArray<AnyParser | string>> =
   InternalJuxtaposeValue<Parsers>
 
-type JuxtaposeItemInput<P extends AnyParser | string> = P extends AnyParser
-  ? ParserInput<P>
-  : P extends string
-    ? P
-    : never
+type JuxtaposeItemInput<Parser extends AnyParser | string> =
+  Parser extends AnyParser
+    ? ParserInput<Parser>
+    : Parser extends string
+      ? Parser
+      : never
 
 type InternalJuxtaposeInput<
   Parsers extends ReadonlyArray<AnyParser | string>,
@@ -104,16 +110,13 @@ function isJuxtapose(
   return isRecordOrArray(value) && TypeBrand in value
 }
 
-type JuxtaposeState = {
-  index: number
-  childStates: ReadonlyArray<unknown>
-}
-
 class Juxtapose<
   const Parsers extends ReadonlyArray<AnyParser | string>,
 > implements InternalParser<JuxtaposeValue<Parsers>> {
   readonly [TypeBrand] = TypeBrand
   readonly structure: ReadonlyArray<AnyParser | string>
+
+  #index = 0
 
   constructor(structure: Parsers) {
     if (structure.length === 0) {
@@ -133,70 +136,112 @@ class Juxtapose<
     this.structure = storage
   }
 
-  init(): JuxtaposeState {
-    return {
-      index: 0,
-      childStates: this.structure.map((el) =>
-        typeof el === 'string' ? undefined : el.init(),
-      ),
-    }
-  }
-
-  feed(state: unknown, token: Token): unknown | null {
-    return this.#feed(state as JuxtaposeState, token)
-  }
-
-  #feed(s: JuxtaposeState, token: Token): JuxtaposeState | null {
-    if (s.index >= this.structure.length) {
-      return null
-    }
-
-    const element = this.structure[s.index] as AnyParser | string
-
-    if (typeof element === 'string') {
-      if (token.type === 'literal' && token.value === element) {
-        return { index: s.index + 1, childStates: s.childStates }
+  satisfied(state: ParserState): boolean {
+    const start = state === initialState ? 0 : this.#index
+    for (let i = start; i < this.structure.length; i++) {
+      const parser = this.structure[i]
+      if (typeof parser === 'string') {
+        return false
       }
-      return null
+      if (typeof parser === 'object' && !parser.satisfied(state)) {
+        return false
+      }
     }
 
-    const childState = s.childStates[s.index]
-    const consumed = element.feed(childState, token)
-    if (consumed !== null) {
-      const next = [...s.childStates]
-      next[s.index] = consumed
-      return { index: s.index, childStates: next }
-    }
-
-    const value = element.read(childState)
-    if (value === undefined) {
-      return null
-    }
-
-    return this.#feed({ index: s.index + 1, childStates: s.childStates }, token)
+    return true
   }
 
-  read(state: unknown): JuxtaposeValue<Parsers> | undefined {
-    const s = state as JuxtaposeState
+  feed(token: Token): boolean {
+    return this.#feed(token)
+  }
+
+  check(token: Token, state: ParserState): boolean {
+    return this.#check(token, state)
+  }
+
+  read(): JuxtaposeValue<Parsers> | undefined {
     const result = [] as Array<unknown>
 
-    for (let i = 0; i < this.structure.length; i++) {
-      const el = this.structure[i] as AnyParser | string
-      if (typeof el === 'string') {
-        continue
+    for (const parser of this.structure) {
+      if (typeof parser !== 'string') {
+        const value = parser.read()
+
+        if (value === undefined) {
+          return undefined
+        }
+
+        result.push(value as never)
       }
-      const value = el.read(s.childStates[i])
-      if (value === undefined) {
-        return undefined
-      }
-      result.push(value)
     }
 
     return result as JuxtaposeValue<Parsers>
   }
 
+  reset(): void {
+    this.#index = 0
+
+    for (const parser of this.structure) {
+      if (typeof parser !== 'string') {
+        parser.reset()
+      }
+    }
+  }
+
   toString(): string {
     return Array.from(this.structure, (parser) => parser.toString()).join(' ')
+  }
+
+  #feed(token: Token): boolean {
+    if (this.#index === this.structure.length) {
+      return false
+    }
+
+    const element = this.structure[this.#index] as AnyParser | string
+
+    if (typeof element === 'string') {
+      if (token.type === 'literal' && token.value === element) {
+        this.#index += 1
+        return true
+      }
+      return false
+    }
+    const consumed = element.feed(token)
+
+    if (!consumed) {
+      if (element.satisfied(currentState)) {
+        this.#index += 1
+        return this.#feed(token)
+      }
+
+      return false
+    }
+
+    return true
+  }
+
+  #check(token: Token, state: ParserState): boolean {
+    if (this.#index === this.structure.length && state === currentState) {
+      return false
+    }
+
+    for (const element of this.structure.slice(
+      state === initialState ? 0 : this.#index,
+    )) {
+      if (typeof element === 'string') {
+        return token.type === 'literal' && token.value === element
+      }
+
+      const consumed = element.check(token, state)
+
+      if (consumed) {
+        return true
+      }
+      if (!element.satisfied(state)) {
+        return false
+      }
+    }
+
+    return true
   }
 }
 

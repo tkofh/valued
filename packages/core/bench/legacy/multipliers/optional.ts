@@ -3,6 +3,7 @@ import type {
   InternalParser,
   Parser,
   ParserInput,
+  ParserState,
   ParserValue,
 } from '../parser'
 import type { Token } from '../tokenizer'
@@ -19,20 +20,30 @@ class Optional<
     this.parser = parser
   }
 
-  init(): unknown {
-    return this.parser.init()
+  satisfied(): boolean {
+    return true
   }
 
-  feed(state: unknown, token: Token): unknown | null {
-    return this.parser.feed(state, token)
+  feed(token: Token): boolean {
+    return this.parser.feed(token)
   }
 
-  read(state: unknown): ParserValue<P> | null {
-    const value = this.parser.read(state) as ParserValue<P> | undefined
+  check(token: Token, state: ParserState): boolean {
+    return this.parser.check(token, state)
+  }
+
+  read(): ParserValue<P> | null {
+    const value = this.parser.read() as ParserValue<P>
+
     if (value !== undefined) {
       return value
     }
+
     return null
+  }
+
+  reset(): void {
+    this.parser.reset()
   }
 
   toString(): string {

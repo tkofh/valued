@@ -1,4 +1,10 @@
-import type { InternalParser, Parser } from '../parser'
+import {
+  currentState,
+  type InternalParser,
+  initialState,
+  type Parser,
+  type ParserState,
+} from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
 
@@ -35,29 +41,46 @@ class KeywordParser<Value extends string> implements InternalParser<
 > {
   readonly keywords: ReadonlySet<Value>
 
+  #value: KeywordValue<Value> | null = null
+
   constructor(keywords: ReadonlySet<Value>) {
     this.keywords = keywords
   }
 
-  init(): undefined {
-    return undefined
+  satisfied(state: ParserState): boolean {
+    return state === currentState && this.#value !== null
   }
 
-  feed(state: unknown, token: Token): unknown | null {
-    if (state !== undefined) {
-      return null
+  feed(token: Token): boolean {
+    if (
+      token.type === 'literal' &&
+      this.keywords.has(token.value as Value) &&
+      this.#value === null
+    ) {
+      this.#value = keywordValue(token.value as Value)
+      return true
     }
-    if (token.type !== 'literal') {
-      return null
-    }
-    if (!this.keywords.has(token.value as Value)) {
-      return null
-    }
-    return keywordValue(token.value as Value)
+    return false
   }
 
-  read(state: unknown): KeywordValue<Value> | undefined {
-    return state as KeywordValue<Value> | undefined
+  check(token: Token, state: ParserState): boolean {
+    return (
+      token.type === 'literal' &&
+      this.keywords.has(token.value as Value) &&
+      (state === initialState || this.#value === null)
+    )
+  }
+
+  read(): KeywordValue<Value> | undefined {
+    if (this.#value === null) {
+      return undefined
+    }
+
+    return this.#value
+  }
+
+  reset(): void {
+    this.#value = null
   }
 
   toString(): string {

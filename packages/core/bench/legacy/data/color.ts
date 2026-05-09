@@ -17,7 +17,12 @@ import {
   XYZ_D50,
   XYZ_D65,
 } from 'colorjs.io/fn'
-import type { InternalParser, Parser } from '../parser'
+import {
+  currentState,
+  type InternalParser,
+  type Parser,
+  type ParserState,
+} from '../parser'
 import { isRecordOrArray } from '../predicates'
 import { stringify, type Token } from '../tokenizer'
 
@@ -68,31 +73,52 @@ export function isColorValue(value: unknown): value is ColorValue {
 }
 
 class ColorParser implements InternalParser<ColorValue> {
-  init(): undefined {
-    return undefined
+  #value: ColorValue | null = null
+
+  satisfied(state: ParserState): boolean {
+    return state === currentState && this.#value !== null
   }
 
-  feed(state: unknown, token: Token): unknown | null {
-    if (state !== undefined) {
-      return null
-    }
+  feed(token: Token): boolean {
     if (token.type === 'literal') {
       const value = colorValue(token.value)
+
       if (value !== false) {
-        return value
+        this.#value = value
+        return true
       }
     }
+
     if (token.type === 'function') {
       const value = colorValue(stringify(token))
+
       if (value !== false) {
-        return value
+        this.#value = value
+        return true
       }
     }
-    return null
+
+    return false
   }
 
-  read(state: unknown): ColorValue | undefined {
-    return state as ColorValue | undefined
+  check(token: Token, state: ParserState): boolean {
+    if (this.#value !== null && state === currentState) {
+      return false
+    }
+
+    return token.type === 'literal' && colorValue(token.value) !== false
+  }
+
+  read(): ColorValue | undefined {
+    if (this.#value === null) {
+      return undefined
+    }
+
+    return this.#value
+  }
+
+  reset(): void {
+    this.#value = null
   }
 
   toString(): string {

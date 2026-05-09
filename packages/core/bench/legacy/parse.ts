@@ -14,17 +14,21 @@ export function parse<P extends AnyParser>(
   value: ParserInput<P> | (string & {}),
   parser: P,
 ): ParseResult<ParserValue<P>> {
-  let state = parser.init()
-  for (const token of tokenize(value)) {
-    const next = parser.feed(state, token)
-    if (next === null) {
+  try {
+    for (const token of tokenize(value)) {
+      if (!parser.feed(token)) {
+        return invalid()
+      }
+    }
+
+    const parsed = parser.read()
+
+    if (parsed === undefined) {
       return invalid()
     }
-    state = next
+
+    return valid(parsed as ParserValue<P>)
+  } finally {
+    parser.reset()
   }
-  const parsed = parser.read(state)
-  if (parsed === undefined) {
-    return invalid()
-  }
-  return valid(parsed as ParserValue<P>)
 }

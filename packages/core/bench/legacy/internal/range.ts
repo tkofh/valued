@@ -1,7 +1,10 @@
 import {
   type AnyParser,
+  currentState,
   type InternalParser,
+  initialState,
   type ParserInput,
+  type ParserState,
   type ParserValue,
 } from '../parser'
 import type { Token } from '../tokenizer'
@@ -163,13 +166,6 @@ export type RangeValue<
     : string
   : string
 
-type RangeState = {
-  values: ReadonlyArray<unknown>
-  current: unknown
-  hasConsumed: boolean
-  commaEncountered: boolean
-}
-
 export class Range<
   P extends AnyParser,
   CommaSeparated extends boolean,
@@ -180,6 +176,10 @@ export class Range<
   readonly minLength: number
   readonly maxLength: number | false
   readonly commaSeparated: boolean
+
+  #value: Array<ParserValue<P>> = []
+  #hasConsumed = false
+  #commaEncountered = true
 
   constructor(
     parser: P,
@@ -203,100 +203,84 @@ export class Range<
     this.commaSeparated = commaSeparated
   }
 
-  init(): RangeState {
-    return {
-      values: [],
-      current: this.parser.init(),
-      hasConsumed: false,
-      commaEncountered: true,
+  satisfied(state: ParserState): boolean {
+    if (state === initialState) {
+      return this.minLength === 0
     }
+
+    if (this.#hasConsumed && !this.parser.satisfied(currentState)) {
+      return false
+    }
+
+    let satisfied = this.#value.length
+    if (this.parser.satisfied(currentState)) {
+      satisfied++
+    }
+
+    return (
+      satisfied >= this.minLength &&
+      (this.maxLength === false || satisfied <= this.maxLength)
+    )
   }
 
-  feed(state: unknown, token: Token): unknown | null {
-    const s = state as RangeState
-
-    if (s.values.length === this.maxLength) {
-      return null
+  feed(token: Token): boolean {
+    if (!this.#canConsumeCurrently(token)) {
+      return false
     }
 
-    if (this.commaSeparated) {
-      const tokenIsComma = isComma(token)
+    const consumed = this.parser.feed(token)
 
-      if (tokenIsComma === s.commaEncountered) {
-        return null
-      }
+    if (consumed) {
+      this.#hasConsumed = true
+      return true
+    }
 
-      if (tokenIsComma) {
-        const tail = this.parser.read(s.current)
-        if (tail === undefined) {
-          return null
-        }
-        return {
-          values: [...s.values, tail],
-          current: this.parser.init(),
-          hasConsumed: false,
-          commaEncountered: true,
-        }
-      }
+    if (this.parser.satisfied(currentState)) {
+      const wouldConsume = this.parser.check(token, initialState)
 
-      const consumed = this.parser.feed(s.current, token)
-      if (consumed === null) {
-        return null
-      }
-      return {
-        values: s.values,
-        current: consumed,
-        hasConsumed: true,
-        commaEncountered: false,
+      if (wouldConsume) {
+        this.#value.push(this.parser.read() as ParserValue<P>)
+        this.parser.reset()
+        this.parser.feed(token)
+        this.#commaEncountered = false
+
+        return true
       }
     }
 
-    const consumed = this.parser.feed(s.current, token)
-    if (consumed !== null) {
-      return {
-        values: s.values,
-        current: consumed,
-        hasConsumed: true,
-        commaEncountered: s.commaEncountered,
-      }
-    }
-
-    const tail = this.parser.read(s.current)
-    if (tail === undefined) {
-      return null
-    }
-
-    const fresh = this.parser.feed(this.parser.init(), token)
-    if (fresh === null) {
-      return null
-    }
-
-    return {
-      values: [...s.values, tail],
-      current: fresh,
-      hasConsumed: s.hasConsumed,
-      commaEncountered: false,
-    }
+    return false
   }
 
-  read(state: unknown): RangeValue<P, Min, Max> | undefined {
-    const s = state as RangeState
-    const tail = this.parser.read(s.current)
+  check(token: Token, state: ParserState): boolean {
+    if (state === initialState) {
+      if (!this.#canConsumeInitially(token)) {
+        return false
+      }
 
-    if (
-      this.commaSeparated &&
-      s.commaEncountered &&
-      s.values.length > 0 &&
-      tail === undefined
-    ) {
+      return this.parser.check(token, initialState)
+    }
+
+    if (!this.#canConsumeCurrently(token)) {
+      return false
+    }
+
+    const current = this.parser.check(token, currentState)
+    if (current) {
+      return true
+    }
+
+    const initial = this.parser.check(token, initialState)
+
+    return initial && this.parser.satisfied(currentState)
+  }
+
+  read(): RangeValue<P, Min, Max> | undefined {
+    if (!this.parser.satisfied(currentState) && this.#hasConsumed) {
       return undefined
     }
 
-    if (tail === undefined && s.hasConsumed) {
-      return undefined
-    }
-
-    const result = [...s.values]
+    const result = [...this.#value]
+    const tail = this.parser.read() as ParserValue<P>
     if (tail !== undefined) {
       result.push(tail)
     }
@@ -306,6 +290,13 @@ export class Range<
     }
 
     return result as RangeValue<P, Min, Max>
+  }
+
+  reset(): void {
+    this.parser.reset()
+    this.#value = []
+    this.#commaEncountered = true
+    this.#hasConsumed = false
   }
 
   toString(): string {
@@ -321,5 +312,21 @@ export class Range<
       modifier = `#${modifier}`
     }
     return `${this.parser.toString()}${modifier}`
+  }
+
+  #canConsumeCurrently(token: Token): boolean {
+    if (this.#value.length === this.maxLength) {
+      return false
+    }
+
+    return !(this.commaSeparated && isComma(token) === this.#commaEncountered)
+  }
+
+  #canConsumeInitially(token: Token): boolean {
+    return !(
+      this.commaSeparated &&
+      token.type === 'literal' &&
+      token.value === ','
+    )
   }
 }

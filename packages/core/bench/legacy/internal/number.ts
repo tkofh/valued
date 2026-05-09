@@ -1,4 +1,4 @@
-import type { InternalParser } from '../parser'
+import { currentState, type InternalParser, type ParserState } from '../parser'
 import type { Token } from '../tokenizer'
 
 const infinity = '∞'
@@ -40,38 +40,59 @@ export class InternalNumberParser<Value> implements InternalParser<Value> {
   readonly #max: number
   readonly #createValue: (value: number) => Value
 
+  #value: Value | null = null
+
   constructor(min: number, max: number, createValue: (value: number) => Value) {
     this.#min = min
     this.#max = max
     this.#createValue = createValue
   }
 
-  init(): undefined {
-    return undefined
+  satisfied(state: ParserState): boolean {
+    return state === currentState && this.#value !== null
   }
 
-  feed(state: unknown, token: Token): unknown | null {
-    if (state !== undefined) {
-      return null
+  feed(token: Token): boolean {
+    if (token.type === 'literal' && this.#value === null) {
+      const value = parseNumericInput(token.value, this.#min, this.#max)
+
+      if (value !== false && this.checkNumberValue(value)) {
+        this.#value = this.#createValue(value)
+        return true
+      }
     }
+    return false
+  }
+
+  check(token: Token, state: ParserState): boolean {
     if (token.type !== 'literal') {
-      return null
+      return false
+    }
+
+    if (this.#value !== null && state === currentState) {
+      return false
     }
     const value = parseNumericInput(token.value, this.#min, this.#max)
+
     if (value === false) {
-      return null
+      return false
     }
-    if (!this.checkNumberValue(value)) {
-      return null
-    }
-    return this.#createValue(value)
+
+    return this.checkNumberValue(value)
   }
 
-  read(state: unknown): Value | undefined {
-    return state as Value | undefined
+  read(): Value | undefined {
+    if (this.#value === null) {
+      return undefined
+    }
+    return this.#value
   }
 
-  toString(label = 'number'): string {
+  reset(): void {
+    this.#value = null
+  }
+
+  toString(label = 'number') {
     return stringifyNumericParser(label, this.#min, this.#max)
   }
 

@@ -1,9 +1,9 @@
 import { juxtapose } from '../combinators/juxtapose'
 import { optional } from '../multipliers/optional'
-import type { InternalParser, Parser } from '../parser'
+import type { InternalParser, Parser, ParserState } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
-import { number, type NumberValue } from './number'
+import { type NumberValue, number } from './number'
 
 export type { Juxtapose, juxtapose } from '../combinators/juxtapose'
 
@@ -66,33 +66,45 @@ function createRatioParser() {
 class RatioParser implements InternalParser<RatioValue> {
   readonly [TypeBrand] = TypeBrand
 
-  readonly #parser: InternalParser<[NumberValue, [NumberValue] | null]>
+  #parser: InternalParser<[NumberValue, [NumberValue] | null]>
 
   constructor() {
     this.#parser = createRatioParser()
   }
 
-  init(): unknown {
-    return this.#parser.init()
+  satisfied(state: ParserState): boolean {
+    return this.#parser.satisfied(state)
   }
 
-  feed(state: unknown, token: Token): unknown | null {
-    return this.#parser.feed(state, token)
+  feed(token: Token): boolean {
+    return this.#parser.feed(token)
   }
 
-  read(state: unknown): RatioValue | undefined {
-    const result = this.#parser.read(state)
+  check(token: Token, state: ParserState): boolean {
+    return this.#parser.check(token, state)
+  }
+
+  read(): RatioValue | undefined {
+    const result = this.#parser.read()
+
     if (result === undefined) {
       return undefined
     }
 
     const [numerator, denominator] = result
+
+    const numeratorValue = numerator.value
     let denominatorValue = 1
+
     if (denominator !== null) {
       denominatorValue = denominator[0].value
     }
 
-    return ratioValue(numerator.value, denominatorValue)
+    return ratioValue(numeratorValue, denominatorValue)
+  }
+
+  reset(): void {
+    this.#parser.reset()
   }
 
   toString(): string {

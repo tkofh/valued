@@ -1,4 +1,4 @@
-import type { InternalParser } from '../parser'
+import { currentState, type InternalParser, type ParserState } from '../parser'
 import type { Token } from '../tokenizer'
 import { parseNumericInput, stringifyNumericParser } from './number'
 
@@ -24,6 +24,7 @@ export class InternalDimensionParser<
 > implements InternalParser<Value> {
   readonly units: ReadonlySet<string>
 
+  #value: Value | null = null
   readonly #createValue: (value: number, unit: Unit) => Value
   readonly #label: string
   readonly #min: number
@@ -50,35 +51,66 @@ export class InternalDimensionParser<
         : options.maxValue
   }
 
-  init(): undefined {
-    return undefined
+  satisfied(state: ParserState): boolean {
+    return state === currentState && this.#value !== null
   }
 
-  feed(state: unknown, token: Token): unknown | null {
-    if (state !== undefined) {
-      return null
+  feed(token: Token): boolean {
+    if (this.#value !== null) {
+      return false
     }
-    if (token.type !== 'literal') {
-      return null
-    }
-    for (const unit of this.units) {
-      if (token.value.endsWith(unit)) {
-        const value = parseNumericInput(
-          token.value.slice(0, -unit.length),
-          this.#min,
-          this.#max,
-        )
 
-        if (value !== false) {
-          return this.#createValue(value, unit as Unit)
+    if (token.type === 'literal') {
+      for (const unit of this.units) {
+        if (token.value.endsWith(unit)) {
+          const value = parseNumericInput(
+            token.value.slice(0, -unit.length),
+            this.#min,
+            this.#max,
+          )
+
+          if (value !== false) {
+            this.#value = this.#createValue(value, unit as Unit)
+            return true
+          }
         }
       }
     }
-    return null
+    return false
   }
 
-  read(state: unknown): Value | undefined {
-    return state as Value | undefined
+  check(token: Token, state: ParserState): boolean {
+    if (this.#value !== null && state === currentState) {
+      return false
+    }
+
+    if (token.type === 'literal') {
+      for (const unit of this.units) {
+        if (token.value.endsWith(unit)) {
+          const value = parseNumericInput(
+            token.value.slice(0, -unit.length),
+            this.#min,
+            this.#max,
+          )
+
+          return value !== false
+        }
+      }
+    }
+
+    return false
+  }
+
+  read(): Value | undefined {
+    if (this.#value === null) {
+      return undefined
+    }
+
+    return this.#value
+  }
+
+  reset(): void {
+    this.#value = null
   }
 
   toString(): string {

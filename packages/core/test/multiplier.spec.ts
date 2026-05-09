@@ -10,6 +10,7 @@ import {
   lengthPercentageValue,
 } from '../src/data/length-percentage'
 import { number, numberValue } from '../src/data/number'
+import { between } from '../src/multipliers/between'
 import { oneOrMore } from '../src/multipliers/oneOrMore'
 import { optional } from '../src/multipliers/optional'
 import { zeroOrMore } from '../src/multipliers/zeroOrMore'
@@ -745,6 +746,81 @@ describe('oneOrMore', () => {
 
     test('treats `foo bar foo` as invalid for `[foo && bar]+`', () => {
       expect(parse('foo bar foo', parser)).toEqual(invalid())
+    })
+  })
+
+  describe('with commaSeparated', () => {
+    const parser = oneOrMore(keyword('foo'), { commaSeparated: true })
+
+    test('treats `foo` as valid for `foo#`', () => {
+      expect(parse('foo', parser)).toEqual(valid([keywordValue('foo')]))
+    })
+
+    test('treats `foo, foo` as valid for `foo#`', () => {
+      expect(parse('foo, foo', parser)).toEqual(
+        valid([keywordValue('foo'), keywordValue('foo')]),
+      )
+    })
+
+    test('treats `foo, foo, foo` as valid for `foo#`', () => {
+      expect(parse('foo, foo, foo', parser)).toEqual(
+        valid([keywordValue('foo'), keywordValue('foo'), keywordValue('foo')]),
+      )
+    })
+
+    test('treats empty string as invalid for `foo#`', () => {
+      expect(parse('', parser)).toEqual(invalid())
+    })
+
+    test('treats `foo,` as invalid for `foo#`', () => {
+      expect(parse('foo,', parser)).toEqual(invalid())
+    })
+
+    test('treats `,foo` as invalid for `foo#`', () => {
+      expect(parse(',foo', parser)).toEqual(invalid())
+    })
+
+    test('treats `foo foo` as invalid for `foo#`', () => {
+      expect(parse('foo foo', parser)).toEqual(invalid())
+    })
+
+    test('treats `foo,, foo` as invalid for `foo#`', () => {
+      expect(parse('foo,, foo', parser)).toEqual(invalid())
+    })
+  })
+})
+
+describe('between', () => {
+  describe('with commaSeparated', () => {
+    const parser = between(keyword('foo'), {
+      minLength: 2,
+      maxLength: 4,
+      commaSeparated: true,
+    })
+
+    test('treats `foo, foo` as valid for `foo#{2,4}`', () => {
+      expect(parse('foo, foo', parser)).toEqual(
+        valid([keywordValue('foo'), keywordValue('foo')]),
+      )
+    })
+
+    test('treats `foo, foo, foo, foo` as valid for `foo#{2,4}`', () => {
+      expect(parse('foo, foo, foo, foo', parser)).toEqual(
+        valid([
+          keywordValue('foo'),
+          keywordValue('foo'),
+          keywordValue('foo'),
+          keywordValue('foo'),
+        ]),
+      )
+    })
+
+    test('treats `foo` as invalid for `foo#{2,4}`', () => {
+      expect(parse('foo', parser)).toEqual(invalid())
+    })
+
+    test('treats `foo, foo, foo, foo, foo` as invalid for `foo#{2,4}`', () => {
+      expect(parse('foo, foo, foo, foo, foo', parser)).toEqual(invalid())
     })
   })
 })
