@@ -70,6 +70,7 @@ class FrequencyPercentageParser
     )
   }
 }
+
 export type { FrequencyPercentageParser, FrequencyPercentageValue }
 
 export function frequencyPercentage(

@@ -54,7 +54,7 @@ class IntegerParser
   }
 }
 
-export type { IntegerValue, IntegerParser }
+export type { IntegerParser, IntegerValue }
 
 export function integer(
   options?: IntegerOptions,

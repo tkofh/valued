@@ -1,11 +1,11 @@
 import {
   type AnyParser,
+  currentState,
   type InternalParser,
+  initialState,
   type ParserInput,
   type ParserState,
   type ParserValue,
-  currentState,
-  initialState,
 } from '../parser'
 import type { Token } from '../tokenizer'
 

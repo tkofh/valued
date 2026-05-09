@@ -5,7 +5,7 @@ import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
 import { type NumberValue, number } from './number'
 
-export type { juxtapose, Juxtapose } from '../combinators/juxtapose'
+export type { Juxtapose, juxtapose } from '../combinators/juxtapose'
 
 const TypeBrand: unique symbol = Symbol('data/ratio')
 

@@ -1,14 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true,
     "defaultBranch": "main"
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -19,9 +17,9 @@
         "noUselessTernary": "warn"
       },
       "correctness": {
-        "noNewSymbol": "error",
         "noUnusedVariables": "warn",
-        "noUnusedImports": "error"
+        "noUnusedImports": "error",
+        "noInvalidBuiltinInstantiation": "error"
       },
       "style": {
         "noDefaultExport": "error",
@@ -68,7 +66,7 @@
   },
   "overrides": [
     {
-      "include": ["*.config.ts", "*.config.mjs"],
+      "includes": ["**/*.config.ts", "**/*.config.mjs"],
       "linter": {
         "rules": {
           "style": {
@@ -78,7 +76,7 @@
       }
     },
     {
-      "include": ["*.vue"],
+      "includes": ["**/*.vue"],
       "linter": {
         "rules": {
           "style": {

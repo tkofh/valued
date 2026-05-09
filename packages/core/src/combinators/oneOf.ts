@@ -1,11 +1,11 @@
 import {
   type AnyParser,
+  currentState,
   type InternalParser,
   type Parser,
   type ParserInput,
   type ParserState,
   type ParserValue,
-  currentState,
 } from '../parser'
 import type { Token } from '../tokenizer'
 
@@ -134,7 +134,7 @@ class OneOf<const Parsers extends ReadonlyArray<AnyParser>>
       return undefined
     }
 
-    let result: ParserValue<Parsers[number]> | undefined = undefined
+    let result: ParserValue<Parsers[number]> | undefined
     for (const parser of this.#candidates) {
       const value = parser.read() as ParserValue<Parsers[number]> | undefined
 
@@ -150,7 +150,7 @@ class OneOf<const Parsers extends ReadonlyArray<AnyParser>>
   }
 
   #readAll(): ParserValue<Parsers[number]> | undefined {
-    let result: ParserValue<Parsers[number]> | undefined = undefined
+    let result: ParserValue<Parsers[number]> | undefined
     for (const parser of this.parsers) {
       if (this.#candidates.has(parser)) {
         continue

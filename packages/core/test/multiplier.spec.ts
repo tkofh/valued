@@ -4,7 +4,7 @@ import { juxtapose } from '../src/combinators/juxtapose'
 import { oneOf } from '../src/combinators/oneOf'
 import { someOf } from '../src/combinators/someOf'
 import { color, colorValue } from '../src/data/color'
-import { keyword, keywordValue, keywords } from '../src/data/keyword'
+import { keyword, keywords, keywordValue } from '../src/data/keyword'
 import {
   lengthPercentage,
   lengthPercentageValue,

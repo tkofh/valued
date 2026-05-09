@@ -17,7 +17,7 @@ function* inputToChunks(input: string): IterableIterator<string> {
   let start = 0
 
   let cursor = 0
-  let previousType: 'literal' | 'space' | 'separator' | undefined = undefined
+  let previousType: 'literal' | 'space' | 'separator' | undefined
   for (const char of input) {
     const currentType = whitespace.has(char)
       ? 'space'

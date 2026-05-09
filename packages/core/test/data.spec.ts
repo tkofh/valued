@@ -207,7 +207,6 @@ describe('angle', () => {
   }
 
   test('throws an error when an unknown unit is provided', () => {
-    // @ts-expect-error
     expect(() => angleValue(45, 'foo')).toThrow()
   })
 

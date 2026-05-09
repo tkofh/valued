@@ -4,27 +4,27 @@ import {
   HSL,
   HSV,
   HWB,
-  LCH,
   Lab,
-  OKLCH,
+  LCH,
   OKLab,
+  OKLCH,
   P3,
   P3_Linear,
-  XYZ_D50,
-  XYZ_D65,
   parse,
+  serialize,
   sRGB,
   sRGB_Linear,
-  serialize,
+  XYZ_D50,
+  XYZ_D65,
 } from 'colorjs.io/fn'
 import {
+  currentState,
   type InternalParser,
   type Parser,
   type ParserState,
-  currentState,
 } from '../parser'
 import { isRecordOrArray } from '../predicates'
-import { type Token, stringify } from '../tokenizer'
+import { stringify, type Token } from '../tokenizer'
 
 ColorSpace.register(XYZ_D65)
 ColorSpace.register(sRGB_Linear)
@@ -126,7 +126,7 @@ class ColorParser implements InternalParser<ColorValue> {
   }
 }
 
-export type { ColorValue, ColorParser }
+export type { ColorParser, ColorValue }
 
 export function color(): Parser<ColorValue, string> {
   return new ColorParser() as never

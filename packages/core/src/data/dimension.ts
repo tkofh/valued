@@ -6,11 +6,8 @@ import {
 import type { InternalParser, Parser } from '../parser'
 import { isRecordOrArray } from '../predicates'
 
-type ValuesOfSet<T extends ReadonlySet<unknown>> = T extends ReadonlySet<
-  infer U
->
-  ? U
-  : never
+type ValuesOfSet<T extends ReadonlySet<unknown>> =
+  T extends ReadonlySet<infer U> ? U : never
 
 export type DimensionInput<Unit extends string> = `${number}${Unit}`
 

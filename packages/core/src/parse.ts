@@ -1,14 +1,14 @@
 import {
   type AnyParser,
+  invalid,
   type ParseResult,
   type ParserInput,
   type ParserValue,
-  invalid,
   valid,
 } from './parser'
 import { tokenize } from './tokenizer'
 
-export type { ParserInput, ParserValue, ParseResult, Parser } from './parser'
+export type { ParseResult, Parser, ParserInput, ParserValue } from './parser'
 
 export function parse<P extends AnyParser>(
   value: ParserInput<P> | (string & {}),

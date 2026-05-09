@@ -4,7 +4,7 @@ import type { AnyParser, Parser, ParserInput, ParserValue } from '../parser'
 export type OneOrMoreInput<P extends AnyParser> = ParserInput<P> | (string & {})
 export type OneOrMoreValue<P extends AnyParser> = ReadonlyArray<
   ParserValue<P>
-> & { [0]: ParserValue<P> }
+> & { 0: ParserValue<P> }
 
 class OneOrMore<P extends AnyParser, C extends boolean> extends Range<
   P,

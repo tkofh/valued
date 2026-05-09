@@ -1,15 +1,16 @@
 import {
   type AnyParser,
+  currentState,
   type InternalParser,
+  initialState,
   type Parser,
   type ParserInput,
   type ParserState,
   type ParserValue,
-  currentState,
-  initialState,
 } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
+
 // import type { FilterStrings } from './types'
 
 type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []

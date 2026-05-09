@@ -1,12 +1,9 @@
-import { type InternalParser, type ParserState, currentState } from '../parser'
+import { currentState, type InternalParser, type ParserState } from '../parser'
 import type { Token } from '../tokenizer'
 import { parseNumericInput, stringifyNumericParser } from './number'
 
-export type ValuesOfSet<T extends ReadonlySet<unknown>> = T extends ReadonlySet<
-  infer U
->
-  ? U
-  : never
+export type ValuesOfSet<T extends ReadonlySet<unknown>> =
+  T extends ReadonlySet<infer U> ? U : never
 
 export interface InternalDimensionValue<Unit extends string> {
   readonly value: number

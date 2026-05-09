@@ -1,4 +1,4 @@
-import { type InternalParser, type ParserState, currentState } from '../parser'
+import { currentState, type InternalParser, type ParserState } from '../parser'
 import type { Token } from '../tokenizer'
 
 const infinity = '∞'

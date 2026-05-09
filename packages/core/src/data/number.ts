@@ -53,7 +53,7 @@ class NumberParser
   }
 }
 
-export type { NumberValue, NumberParser }
+export type { NumberParser, NumberValue }
 
 export function number(
   options?: NumberOptions,

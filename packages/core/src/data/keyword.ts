@@ -1,9 +1,9 @@
 import {
+  currentState,
   type InternalParser,
+  initialState,
   type Parser,
   type ParserState,
-  currentState,
-  initialState,
 } from '../parser'
 import { isRecordOrArray } from '../predicates'
 import type { Token } from '../tokenizer'
