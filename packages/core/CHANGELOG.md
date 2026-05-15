@@ -1,5 +1,13 @@
 # valued
 
+## 0.4.8
+
+### Patch Changes
+
+- b06d427: add `useValued` Vue composable at `valued/vue`. preserves referential identity across structurally equal parses, supports `defaultValue` and `holdOnError` for failure handling. `vue` is declared as an optional peer dependency
+- b06d427: add `valuedEqual` for structural equality of parsed values, available at `valued/equals`
+- f60ea22: add toString() for all data types
+
 ## 0.4.7
 
 ### Patch Changes

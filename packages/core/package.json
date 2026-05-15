@@ -1,6 +1,6 @@
 {
   "name": "valued",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "parse strings as css values",
   "homepage": "https://github.com/tkofh/css-value-parser#readme",
   "bugs": {
