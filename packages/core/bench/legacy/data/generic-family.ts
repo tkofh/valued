@@ -1,4 +1,4 @@
-import { keywords } from './keyword'
+import { keywords } from './keyword.ts'
 
 export const genericFamily = () =>
   keywords([

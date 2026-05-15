@@ -7,9 +7,9 @@ import {
   type ParserInput,
   type ParserState,
   type ParserValue,
-} from '../parser'
-import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
+} from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
+import type { Token } from '../tokenizer.ts'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends [string]
   ? T[0]

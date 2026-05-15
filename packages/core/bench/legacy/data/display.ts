@@ -1,6 +1,6 @@
-import { allOf } from '../combinators/allOf'
-import { optional } from '../multipliers/optional'
-import { keyword, keywords } from './keyword'
+import { allOf } from '../combinators/allOf.ts'
+import { optional } from '../multipliers/optional.ts'
+import { keyword, keywords } from './keyword.ts'
 
 export const displayBox = () => keywords(['none', 'contents'])
 

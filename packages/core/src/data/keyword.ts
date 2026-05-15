@@ -1,6 +1,6 @@
-import type { InternalParser, Parser } from '../parser'
-import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
+import type { InternalParser, Parser } from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
+import type { Token } from '../tokenizer.ts'
 
 const TypeBrand: unique symbol = Symbol('data/keyword')
 

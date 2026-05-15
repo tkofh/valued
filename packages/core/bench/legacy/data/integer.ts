@@ -1,6 +1,6 @@
-import { InternalNumberParser } from '../internal/number'
-import type { InternalParser, Parser } from '../parser'
-import { isRecordOrArray } from '../predicates'
+import { InternalNumberParser } from '../internal/number.ts'
+import type { InternalParser, Parser } from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
 
 const TypeBrand: unique symbol = Symbol('data/integer')
 

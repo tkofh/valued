@@ -1,5 +1,5 @@
-import { Range } from '../internal/range'
-import type { AnyParser, Parser, ParserInput, ParserValue } from '../parser'
+import { Range } from '../internal/range.ts'
+import type { AnyParser, Parser, ParserInput, ParserValue } from '../parser.ts'
 
 export type ZeroOrMoreValue<P extends AnyParser> = ReadonlyArray<ParserValue<P>>
 export type ZeroOrMoreInput<P extends AnyParser> =

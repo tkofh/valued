@@ -1,8 +1,8 @@
-import { juxtapose } from '../combinators/juxtapose'
-import { oneOf } from '../combinators/oneOf'
-import { optional } from '../multipliers/optional'
-import { hueInterpolationMethod } from './hue-interpolation-method'
-import { keywords } from './keyword'
+import { juxtapose } from '../combinators/juxtapose.ts'
+import { oneOf } from '../combinators/oneOf.ts'
+import { optional } from '../multipliers/optional.ts'
+import { hueInterpolationMethod } from './hue-interpolation-method.ts'
+import { keywords } from './keyword.ts'
 
 const rectangularColorSpace = () =>
   keywords([

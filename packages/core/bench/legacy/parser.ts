@@ -1,4 +1,4 @@
-import type { Token } from './tokenizer'
+import type { Token } from './tokenizer.ts'
 
 export const initialState = 0
 export const currentState = 1

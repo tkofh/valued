@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
-import { angle, angleValue } from '../src/data/angle'
-import { color, colorValue } from '../src/data/color'
-import { dimension, dimensionValue } from '../src/data/dimension'
-import { keyword, keywordValue } from '../src/data/keyword'
-import { length, lengthValue } from '../src/data/length'
-import { lengthPercentageValue } from '../src/data/length-percentage'
-import { number, numberValue } from '../src/data/number'
-import { position } from '../src/data/position'
-import { parse } from '../src/parse'
-import { invalid, valid } from '../src/parser'
+import { angle, angleValue } from '../src/data/angle.ts'
+import { color, colorValue } from '../src/data/color.ts'
+import { dimension, dimensionValue } from '../src/data/dimension.ts'
+import { keyword, keywordValue } from '../src/data/keyword.ts'
+import { length, lengthValue } from '../src/data/length.ts'
+import { lengthPercentageValue } from '../src/data/length-percentage.ts'
+import { number, numberValue } from '../src/data/number.ts'
+import { position } from '../src/data/position.ts'
+import { parse } from '../src/parse.ts'
+import { invalid, valid } from '../src/parser.ts'
 
 describe('dimension', () => {
   const cases = [
@@ -207,6 +207,7 @@ describe('angle', () => {
   }
 
   test('throws an error when an unknown unit is provided', () => {
+    // @ts-expect-error
     expect(() => angleValue(45, 'foo')).toThrow()
   })
 

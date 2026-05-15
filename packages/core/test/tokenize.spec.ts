@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { tokenize } from '../src/tokenizer'
+import { tokenize } from '../src/tokenizer.ts'
 
 describe('basic parsing', () => {
   test('tokenizes a literal', () => {

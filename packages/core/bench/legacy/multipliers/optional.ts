@@ -5,8 +5,8 @@ import type {
   ParserInput,
   ParserState,
   ParserValue,
-} from '../parser'
-import type { Token } from '../tokenizer'
+} from '../parser.ts'
+import type { Token } from '../tokenizer.ts'
 
 export type OptionalValue<P extends AnyParser> = ParserValue<P> | null
 export type OptionalInput<P extends AnyParser> = ParserInput<P> | ''

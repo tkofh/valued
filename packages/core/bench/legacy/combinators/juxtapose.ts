@@ -7,11 +7,11 @@ import {
   type ParserInput,
   type ParserState,
   type ParserValue,
-} from '../parser'
-import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
+} from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
+import type { Token } from '../tokenizer.ts'
 
-// import type { FilterStrings } from './types'
+// import type { FilterStrings } from './types.ts'
 
 type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
   ? ''

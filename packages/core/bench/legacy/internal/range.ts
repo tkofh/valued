@@ -6,8 +6,8 @@ import {
   type ParserInput,
   type ParserState,
   type ParserValue,
-} from '../parser'
-import type { Token } from '../tokenizer'
+} from '../parser.ts'
+import type { Token } from '../tokenizer.ts'
 
 function isComma(token: Token): boolean {
   return token.type === 'literal' && token.value === ','

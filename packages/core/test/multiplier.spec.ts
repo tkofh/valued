@@ -1,21 +1,21 @@
 import { describe, expect, test } from 'vitest'
-import { allOf } from '../src/combinators/allOf'
-import { juxtapose } from '../src/combinators/juxtapose'
-import { oneOf } from '../src/combinators/oneOf'
-import { someOf } from '../src/combinators/someOf'
-import { color, colorValue } from '../src/data/color'
-import { keyword, keywords, keywordValue } from '../src/data/keyword'
+import { allOf } from '../src/combinators/allOf.ts'
+import { juxtapose } from '../src/combinators/juxtapose.ts'
+import { oneOf } from '../src/combinators/oneOf.ts'
+import { someOf } from '../src/combinators/someOf.ts'
+import { color, colorValue } from '../src/data/color.ts'
+import { keyword, keywords, keywordValue } from '../src/data/keyword.ts'
 import {
   lengthPercentage,
   lengthPercentageValue,
-} from '../src/data/length-percentage'
-import { number, numberValue } from '../src/data/number'
-import { between } from '../src/multipliers/between'
-import { oneOrMore } from '../src/multipliers/oneOrMore'
-import { optional } from '../src/multipliers/optional'
-import { zeroOrMore } from '../src/multipliers/zeroOrMore'
-import { parse } from '../src/parse'
-import { invalid, valid } from '../src/parser'
+} from '../src/data/length-percentage.ts'
+import { number, numberValue } from '../src/data/number.ts'
+import { between } from '../src/multipliers/between.ts'
+import { oneOrMore } from '../src/multipliers/oneOrMore.ts'
+import { optional } from '../src/multipliers/optional.ts'
+import { zeroOrMore } from '../src/multipliers/zeroOrMore.ts'
+import { parse } from '../src/parse.ts'
+import { invalid, valid } from '../src/parser.ts'
 
 describe('optional', () => {
   test('treats empty string as valid for optional keyword', () => {

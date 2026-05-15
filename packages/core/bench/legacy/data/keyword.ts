@@ -4,9 +4,9 @@ import {
   initialState,
   type Parser,
   type ParserState,
-} from '../parser'
-import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
+} from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
+import type { Token } from '../tokenizer.ts'
 
 const TypeBrand: unique symbol = Symbol('data/keyword')
 

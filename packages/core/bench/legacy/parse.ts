@@ -5,10 +5,10 @@ import {
   type ParserInput,
   type ParserValue,
   valid,
-} from './parser'
-import { tokenize } from './tokenizer'
+} from './parser.ts'
+import { tokenize } from './tokenizer.ts'
 
-export type { ParseResult, Parser, ParserInput, ParserValue } from './parser'
+export type { ParseResult, Parser, ParserInput, ParserValue } from './parser.ts'
 
 export function parse<P extends AnyParser>(
   value: ParserInput<P> | (string & {}),

@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { allOf } from '../src/combinators/allOf'
-import { juxtapose } from '../src/combinators/juxtapose'
-import { oneOf } from '../src/combinators/oneOf'
-import { someOf } from '../src/combinators/someOf'
-import { dimension, dimensionValue } from '../src/data/dimension'
-import { keyword, keywordValue } from '../src/data/keyword'
-import { optional } from '../src/multipliers/optional'
-import { parse } from '../src/parse'
-import { invalid, valid } from '../src/parser'
+import { allOf } from '../src/combinators/allOf.ts'
+import { juxtapose } from '../src/combinators/juxtapose.ts'
+import { oneOf } from '../src/combinators/oneOf.ts'
+import { someOf } from '../src/combinators/someOf.ts'
+import { dimension, dimensionValue } from '../src/data/dimension.ts'
+import { keyword, keywordValue } from '../src/data/keyword.ts'
+import { optional } from '../src/multipliers/optional.ts'
+import { parse } from '../src/parse.ts'
+import { invalid, valid } from '../src/parser.ts'
 
 describe('oneOf', () => {
   const cases = [

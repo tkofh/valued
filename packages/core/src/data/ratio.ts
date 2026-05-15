@@ -1,11 +1,11 @@
-import { juxtapose } from '../combinators/juxtapose'
-import { optional } from '../multipliers/optional'
-import type { InternalParser, Parser } from '../parser'
-import { isRecordOrArray } from '../predicates'
-import type { Token } from '../tokenizer'
-import { number, type NumberValue } from './number'
+import { juxtapose } from '../combinators/juxtapose.ts'
+import { optional } from '../multipliers/optional.ts'
+import type { InternalParser, Parser } from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
+import type { Token } from '../tokenizer.ts'
+import { number, type NumberValue } from './number.ts'
 
-export type { Juxtapose, juxtapose } from '../combinators/juxtapose'
+export type { Juxtapose, juxtapose } from '../combinators/juxtapose.ts'
 
 const TypeBrand: unique symbol = Symbol('data/ratio')
 

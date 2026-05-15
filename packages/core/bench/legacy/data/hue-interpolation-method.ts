@@ -1,5 +1,5 @@
-import { juxtapose } from '../combinators/juxtapose'
-import { keywords } from './keyword'
+import { juxtapose } from '../combinators/juxtapose.ts'
+import { keywords } from './keyword.ts'
 
 export const hueInterpolationMethod = () =>
   juxtapose([

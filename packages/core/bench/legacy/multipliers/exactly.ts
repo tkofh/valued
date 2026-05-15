@@ -1,5 +1,5 @@
-import { Range, type RangeInput, type RangeValue } from '../internal/range'
-import type { AnyParser, Parser } from '../parser'
+import { Range, type RangeInput, type RangeValue } from '../internal/range.ts'
+import type { AnyParser, Parser } from '../parser.ts'
 
 export type ExactlyValue<
   P extends AnyParser,

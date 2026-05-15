@@ -1,8 +1,8 @@
-import { allOf } from '../combinators/allOf'
-import { juxtapose } from '../combinators/juxtapose'
-import { oneOf } from '../combinators/oneOf'
-import { keywords } from './keyword'
-import { lengthPercentage } from './length-percentage'
+import { allOf } from '../combinators/allOf.ts'
+import { juxtapose } from '../combinators/juxtapose.ts'
+import { oneOf } from '../combinators/oneOf.ts'
+import { keywords } from './keyword.ts'
+import { lengthPercentage } from './length-percentage.ts'
 
 export const position = () =>
   oneOf([

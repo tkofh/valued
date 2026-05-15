@@ -2,9 +2,9 @@ import {
   InternalDimensionParser,
   type InternalDimensionValue,
   type ValuesOfSet,
-} from '../internal/dimension'
-import type { InternalParser, Parser } from '../parser'
-import { isRecordOrArray } from '../predicates'
+} from '../internal/dimension.ts'
+import type { InternalParser, Parser } from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
 
 const TypeBrand: unique symbol = Symbol('data/flex')
 

@@ -1,5 +1,5 @@
-import { oneOf } from '../combinators/oneOf'
-import { keyword } from './keyword'
+import { oneOf } from '../combinators/oneOf.ts'
+import { keyword } from './keyword.ts'
 
 export const absoluteSize = () =>
   oneOf([

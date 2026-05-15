@@ -22,9 +22,9 @@ import {
   type InternalParser,
   type Parser,
   type ParserState,
-} from '../parser'
-import { isRecordOrArray } from '../predicates'
-import { stringify, type Token } from '../tokenizer'
+} from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
+import { stringify, type Token } from '../tokenizer.ts'
 
 ColorSpace.register(XYZ_D65)
 ColorSpace.register(sRGB_Linear)

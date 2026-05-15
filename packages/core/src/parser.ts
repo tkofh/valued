@@ -1,4 +1,4 @@
-import type { Token } from './tokenizer'
+import type { Token } from './tokenizer.ts'
 
 declare const ParserValueBrand: unique symbol
 declare const ParserInputBrand: unique symbol

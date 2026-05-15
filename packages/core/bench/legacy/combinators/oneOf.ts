@@ -6,8 +6,8 @@ import {
   type ParserInput,
   type ParserState,
   type ParserValue,
-} from '../parser'
-import type { Token } from '../tokenizer'
+} from '../parser.ts'
+import type { Token } from '../tokenizer.ts'
 
 export type OneOfInput<Parsers extends ReadonlyArray<AnyParser>> = ParserInput<
   Parsers[number]

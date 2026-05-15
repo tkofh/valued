@@ -17,9 +17,9 @@ import {
   XYZ_D50,
   XYZ_D65,
 } from 'colorjs.io/fn'
-import type { InternalParser, Parser } from '../parser'
-import { isRecordOrArray } from '../predicates'
-import { stringify, type Token } from '../tokenizer'
+import type { InternalParser, Parser } from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
+import { stringify, type Token } from '../tokenizer.ts'
 
 ColorSpace.register(XYZ_D65)
 ColorSpace.register(sRGB_Linear)

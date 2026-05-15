@@ -1,6 +1,10 @@
-import { currentState, type InternalParser, type ParserState } from '../parser'
-import type { Token } from '../tokenizer'
-import { parseNumericInput, stringifyNumericParser } from './number'
+import {
+  currentState,
+  type InternalParser,
+  type ParserState,
+} from '../parser.ts'
+import type { Token } from '../tokenizer.ts'
+import { parseNumericInput, stringifyNumericParser } from './number.ts'
 
 export type ValuesOfSet<T extends ReadonlySet<unknown>> =
   T extends ReadonlySet<infer U> ? U : never

@@ -1,6 +1,6 @@
-import { oneOf } from '../combinators/oneOf'
-import { angle } from './angle'
-import { number } from './number'
+import { oneOf } from '../combinators/oneOf.ts'
+import { angle } from './angle.ts'
+import { number } from './number.ts'
 
 interface HueOptions {
   min?: number | false | null | undefined

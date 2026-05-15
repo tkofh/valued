@@ -2,9 +2,9 @@ import {
   type InternalDimensionOptions,
   InternalDimensionParser,
   type InternalDimensionValue,
-} from '../internal/dimension'
-import type { InternalParser, Parser } from '../parser'
-import { isRecordOrArray } from '../predicates'
+} from '../internal/dimension.ts'
+import type { InternalParser, Parser } from '../parser.ts'
+import { isRecordOrArray } from '../predicates.ts'
 
 type ValuesOfSet<T extends ReadonlySet<unknown>> =
   T extends ReadonlySet<infer U> ? U : never
