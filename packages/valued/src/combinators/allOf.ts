@@ -7,7 +7,10 @@ import type {
 } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'
-import type { NarrowForPermutation } from '../internal/union.ts'
+import type {
+  ExactCombinatorFits,
+  LooseCombinatorInput,
+} from '../internal/union.ts'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends [string]
   ? T[0]
@@ -38,11 +41,6 @@ type Combinations<T extends ReadonlyArray<string>> = T extends [string]
             ? ''
             : string
 
-// `Combinations` enumerates every ordering, so its size grows with the product
-// of the parsers' input widths times their permutations. Cap each parser's
-// input width first: a wide dimension input collapses to `string` (which
-// absorbs across the orderings) instead of multiplying out past TypeScript's
-// union limit, while narrow keyword sets keep their exact orderings.
 type InternalAllOfInput<
   Parsers extends ReadonlyArray<AnyParser>,
   Inputs extends ReadonlyArray<string> = [],
@@ -50,21 +48,24 @@ type InternalAllOfInput<
   ? Combinations<Inputs>
   : InternalAllOfInput<
       Parsers,
-      [
-        ...Inputs,
-        NarrowForPermutation<
-          ParserInput<Parsers[Inputs['length']]>,
-          Parsers['length']
-        >,
-      ]
+      [...Inputs, ParserInput<Parsers[Inputs['length']]>]
     >
 
 /**
  * The accepted-input type of an {@link allOf} parser: every ordering of the
  * parsers' inputs, space-separated.
+ *
+ * `Combinations` enumerates every ordering, so its size grows with the product
+ * of the parsers' input widths times their permutations. When every input is
+ * narrow enough that stays bounded, the exact orderings are used; when it
+ * would overflow (a wide dimension input, or too many parsers), the type falls
+ * back to {@link LooseCombinatorInput} — each parser's own input plus
+ * `string & {}` — so a single value still autocompletes.
  */
 export type AllOfInput<T extends ReadonlyArray<AnyParser>> =
-  InternalAllOfInput<T>
+  ExactCombinatorFits<T> extends true
+    ? InternalAllOfInput<T>
+    : LooseCombinatorInput<T>
 
 type InternalAllOfValue<
   Parsers extends ReadonlyArray<AnyParser>,

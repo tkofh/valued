@@ -7,7 +7,7 @@ import type {
 } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'
-import type { NarrowForProduct } from '../internal/union.ts'
+import type { IsUnionAtMost, Loose, ProductBudget } from '../internal/union.ts'
 
 type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
   ? ''
@@ -89,10 +89,6 @@ type JuxtaposeItemInput<P extends AnyParser | string> = P extends AnyParser
     ? P
     : never
 
-// The sequence input is a product of the items' input widths, so cap each item
-// by the sequence length before joining: a wide dimension input collapses to
-// `string` (which absorbs across the join) instead of multiplying out past
-// TypeScript's union limit, while narrow keyword items stay exact.
 type InternalJuxtaposeInput<
   Parsers extends ReadonlyArray<AnyParser | string>,
   Inputs extends ReadonlyArray<string> = [],
@@ -100,21 +96,37 @@ type InternalJuxtaposeInput<
   ? JoinWithSpace<Inputs>
   : InternalJuxtaposeInput<
       Parsers,
-      [
-        ...Inputs,
-        NarrowForProduct<
-          JuxtaposeItemInput<Parsers[Inputs['length']]>,
-          Parsers['length']
-        >,
-      ]
+      [...Inputs, JuxtaposeItemInput<Parsers[Inputs['length']]>]
     >
+
+// True when every item's input fits the product budget for the sequence length,
+// so the exact join stays bounded.
+type JuxtaposeFits<
+  Parsers extends ReadonlyArray<AnyParser | string>,
+  Limit extends number = ProductBudget<Parsers['length']>,
+> = Parsers extends readonly [
+  infer Head extends AnyParser | string,
+  ...infer Tail extends ReadonlyArray<AnyParser | string>,
+]
+  ? IsUnionAtMost<JuxtaposeItemInput<Head>, Limit> extends true
+    ? JuxtaposeFits<Tail, Limit>
+    : false
+  : true
 
 /**
  * The accepted-input type of a {@link juxtapose} parser: each entry's input
  * joined by single spaces.
+ *
+ * The join is a product of the items' input widths. When every item is narrow
+ * enough that stays bounded, the exact joined type is used; when it would
+ * overflow (a wide dimension item, or too many items), the type falls back to
+ * the first item's input plus `string & {}` — so the leading token still
+ * autocompletes while any full sequence is accepted.
  */
 export type JuxtaposeInput<Parsers extends ReadonlyArray<AnyParser | string>> =
-  InternalJuxtaposeInput<Parsers>
+  JuxtaposeFits<Parsers> extends true
+    ? InternalJuxtaposeInput<Parsers>
+    : Loose<JuxtaposeItemInput<Parsers[0]>>
 
 const TypeBrand: unique symbol = Symbol('combinators/juxtapose')
 

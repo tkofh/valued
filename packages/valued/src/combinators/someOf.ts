@@ -7,7 +7,10 @@ import {
 } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'
-import type { NarrowForPermutation } from '../internal/union.ts'
+import type {
+  ExactCombinatorFits,
+  LooseCombinatorInput,
+} from '../internal/union.ts'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends []
   ? ''
@@ -73,11 +76,6 @@ type InternalSomeOfValue<
 export type SomeOfValue<Parsers extends ReadonlyArray<AnyParser>> =
   InternalSomeOfValue<Parsers>
 
-// `Combinations` enumerates every ordering of every subset, so its size grows
-// even faster than allOf's. Cap each parser's input width first: a wide
-// dimension input collapses to `string` (which absorbs across the orderings)
-// instead of multiplying out past TypeScript's union limit, while narrow
-// keyword sets keep their exact orderings.
 type InternalSomeOfInput<
   Parsers extends ReadonlyArray<AnyParser>,
   Inputs extends ReadonlyArray<string> = [],
@@ -85,21 +83,24 @@ type InternalSomeOfInput<
   ? Combinations<Inputs>
   : InternalSomeOfInput<
       Parsers,
-      [
-        ...Inputs,
-        NarrowForPermutation<
-          ParserInput<Parsers[Inputs['length']]>,
-          Parsers['length']
-        >,
-      ]
+      [...Inputs, ParserInput<Parsers[Inputs['length']]>]
     >
 
 /**
  * The accepted-input type of a {@link someOf} parser: every ordering of every
  * non-empty subset of the parsers' inputs, space-separated.
+ *
+ * `Combinations` enumerates every ordering of every subset, so it grows even
+ * faster than allOf's. When every input is narrow enough that stays bounded,
+ * the exact orderings are used; when it would overflow (a wide dimension
+ * input, or too many parsers), the type falls back to
+ * {@link LooseCombinatorInput} — each parser's own input plus `string & {}` —
+ * so a single value still autocompletes.
  */
 export type SomeOfInput<Parsers extends ReadonlyArray<AnyParser>> =
-  InternalSomeOfInput<Parsers, []>
+  ExactCombinatorFits<Parsers> extends true
+    ? InternalSomeOfInput<Parsers, []>
+    : LooseCombinatorInput<Parsers>
 
 const TypeBrand: unique symbol = Symbol('combinators/someOf')
 
