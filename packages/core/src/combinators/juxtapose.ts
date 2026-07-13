@@ -1,9 +1,9 @@
-import {
-  type AnyParser,
-  type InternalParser,
-  type Parser,
-  type ParserInput,
-  type ParserValue,
+import type {
+  AnyParser,
+  InternalParser,
+  Parser,
+  ParserInput,
+  ParserValue,
 } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'

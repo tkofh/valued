@@ -6,7 +6,8 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "test:run": {
+    "check": {},
+    "test": {
       "dependsOn": ["^build"],
       "cache": true
     }
