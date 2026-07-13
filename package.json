@@ -3,14 +3,17 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "test": "turbo run test:run",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
+    "deps:reinstall": "pnpm dlx rimraf --glob node_modules packages/*/node_modules pnpm-lock.yaml && pnpm install",
+    "deps:upgrade": "pnpm update --recursive --latest && pnpm dedupe",
+    "typecheck": "turbo run check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "check": "pnpm format && pnpm lint:fix",
-    "check:report": "pnpm format:check && pnpm lint",
-    "publish-packages": "pnpm check:report && turbo run build test:run && changeset version && changeset publish && pnpm check"
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "check": "turbo run check && oxlint && oxfmt --check .",
+    "fix": "oxlint --fix && oxfmt --write .",
+    "test": "turbo run test",
+    "version-packages": "changeset version && pnpm install --lockfile-only && pnpm run format"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",

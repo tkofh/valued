@@ -173,9 +173,10 @@
     "access": "public"
   },
   "scripts": {
+    "prepublishOnly": "tsdown",
     "build": "tsdown",
-    "test": "vitest",
-    "test:run": "vitest run",
+    "check": "tsc -p .",
+    "test": "vitest run",
     "bench": "vitest bench --run"
   },
   "dependencies": {
