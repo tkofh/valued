@@ -2,12 +2,16 @@
   "name": "valued",
   "version": "0.4.9",
   "description": "parse strings as css values",
-  "homepage": "https://github.com/tkofh/css-value-parser#readme",
+  "homepage": "https://github.com/tkofh/valued#readme",
   "bugs": {
-    "url": "https://github.com/tkofh/css-value-parser/issues"
+    "url": "https://github.com/tkofh/valued/issues"
   },
   "license": "MIT",
   "author": "tim morris <timthewebguy@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tkofh/valued.git"
+  },
   "files": [
     "dist"
   ],
