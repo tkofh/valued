@@ -33,7 +33,7 @@ jobs:
       - name: Check whether the version on main is already published
         id: gate
         run: |
-          version="$(jq -r .version packages/core/package.json)"
+          version="$(jq -r .version packages/valued/package.json)"
           if npm view "valued@${version}" version >/dev/null 2>&1; then
             echo "valued@${version} is already on npm; no publish needed"
             echo "needs-publish=false" >> "$GITHUB_OUTPUT"
