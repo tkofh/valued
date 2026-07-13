@@ -6,4 +6,6 @@ Fix `between` and `exactly` accepting one match beyond `maxLength` in the space-
 
 Fix `integer()` rejecting whole numbers with magnitude `2 ** 31` or greater; the range is now checked with `Number.isInteger` instead of a 32-bit truncation.
 
+Keep generated input types from overflowing TypeScript's union limit. Repeating or combining a wide-input parser (`between(length(), { minLength: 1, maxLength: 4 })`, `juxtapose([length(), length(), length()])`, and similar) previously errored with `TS2590`; a too-wide element's input now widens to `string` past a size budget, while narrow keyword grammars keep their exact input types. Declaration output shrinks as a result.
+
 Add JSDoc across the public API — `parse`, the combinators, multipliers, data types, and the `equals` / `vue` entry points — with verified examples and documented contracts.

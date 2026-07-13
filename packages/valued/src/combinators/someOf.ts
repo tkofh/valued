@@ -7,6 +7,7 @@ import {
 } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'
+import type { NarrowForPermutation } from '../internal/union.ts'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends []
   ? ''
@@ -72,6 +73,11 @@ type InternalSomeOfValue<
 export type SomeOfValue<Parsers extends ReadonlyArray<AnyParser>> =
   InternalSomeOfValue<Parsers>
 
+// `Combinations` enumerates every ordering of every subset, so its size grows
+// even faster than allOf's. Cap each parser's input width first: a wide
+// dimension input collapses to `string` (which absorbs across the orderings)
+// instead of multiplying out past TypeScript's union limit, while narrow
+// keyword sets keep their exact orderings.
 type InternalSomeOfInput<
   Parsers extends ReadonlyArray<AnyParser>,
   Inputs extends ReadonlyArray<string> = [],
@@ -79,7 +85,13 @@ type InternalSomeOfInput<
   ? Combinations<Inputs>
   : InternalSomeOfInput<
       Parsers,
-      [...Inputs, ParserInput<Parsers[Inputs['length']]>]
+      [
+        ...Inputs,
+        NarrowForPermutation<
+          ParserInput<Parsers[Inputs['length']]>,
+          Parsers['length']
+        >,
+      ]
     >
 
 /**

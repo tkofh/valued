@@ -7,6 +7,7 @@ import type {
 } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'
+import type { NarrowForProduct } from '../internal/union.ts'
 
 type JoinWithSpace<T extends ReadonlyArray<string>> = T extends readonly []
   ? ''
@@ -88,6 +89,10 @@ type JuxtaposeItemInput<P extends AnyParser | string> = P extends AnyParser
     ? P
     : never
 
+// The sequence input is a product of the items' input widths, so cap each item
+// by the sequence length before joining: a wide dimension input collapses to
+// `string` (which absorbs across the join) instead of multiplying out past
+// TypeScript's union limit, while narrow keyword items stay exact.
 type InternalJuxtaposeInput<
   Parsers extends ReadonlyArray<AnyParser | string>,
   Inputs extends ReadonlyArray<string> = [],
@@ -95,7 +100,13 @@ type InternalJuxtaposeInput<
   ? JoinWithSpace<Inputs>
   : InternalJuxtaposeInput<
       Parsers,
-      [...Inputs, JuxtaposeItemInput<Parsers[Inputs['length']]>]
+      [
+        ...Inputs,
+        NarrowForProduct<
+          JuxtaposeItemInput<Parsers[Inputs['length']]>,
+          Parsers['length']
+        >,
+      ]
     >
 
 /**

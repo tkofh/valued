@@ -5,6 +5,7 @@ import type {
   ParserValue,
 } from '../parser.ts'
 import type { Token } from '../tokenizer.ts'
+import type { NarrowForProduct } from './union.ts'
 
 function isComma(token: Token): boolean {
   return token.type === 'literal' && token.value === ','
@@ -134,6 +135,11 @@ type NumberRange<Start extends Integer, End extends Integer> = [
   ],
 ][Start][End]
 
+// The generated input enumerates every accepted repetition, so its size grows
+// as (input width) ** maxCount. `NarrowForProduct` caps the per-element width
+// tighter as the count rises, so a wide base (like a ~50-unit dimension)
+// collapses to `string` past the budget instead of producing millions of
+// members; a dimension's units survive up to 2 repetitions, then widen.
 export type RangeInput<
   P extends AnyParser,
   C extends boolean,
@@ -141,7 +147,11 @@ export type RangeInput<
   Max extends number,
 > = Min extends Integer
   ? Max extends Integer
-    ? Repeat<ParserInput<P>, C extends true ? ', ' : ' ', NumberRange<Min, Max>>
+    ? Repeat<
+        NarrowForProduct<ParserInput<P>, Max>,
+        C extends true ? ', ' : ' ',
+        NumberRange<Min, Max>
+      >
     : string
   : string
 

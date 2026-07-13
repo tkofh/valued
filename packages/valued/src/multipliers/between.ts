@@ -68,12 +68,12 @@ interface BetweenOptions {
  *
  * @example
  * ```ts
- * // a 1-to-4 value px spacing shorthand: <length-px>{1,4}
- * const spacing = between(length.subset(['px']), { minLength: 1, maxLength: 4 })
+ * // padding: <length>{1,4}
+ * const padding = between(length(), { minLength: 1, maxLength: 4 })
  *
- * parse('10px', spacing)                // [LengthValue]
- * parse('10px 20px 10px 20px', spacing) // four LengthValues
- * parse('1px 2px 3px 4px 5px', spacing) // { valid: false } — over maxLength
+ * parse('10px', padding)                // [LengthValue]
+ * parse('10px 20px 10px 20px', padding) // four LengthValues
+ * parse('1px 2px 3px 4px 5px', padding) // { valid: false } — over maxLength
  * ```
  */
 export function between<
