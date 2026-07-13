@@ -19,18 +19,19 @@ import (`valued`, `valued/data/length`, `valued/combinators/someOf`, …), not b
 reading the module around it.
 
 **Expertise.**
-- *Proficient in TypeScript,* including generics and template-literal types —
+
+- _Proficient in TypeScript,_ including generics and template-literal types —
   the public API exposes `ParserInput<P>` / `ParserValue<P>` and infers
   accepted input as template literals. Don't gloss TypeScript.
-- *Familiar with CSS and the [Value Definition
-  Syntax](https://www.w3.org/TR/css-values-4/#value-defs), not expert in it.*
+- _Familiar with CSS and the [Value Definition
+  Syntax](https://www.w3.org/TR/css-values-4/#value-defs), not expert in it._
   They know what a production like `<length-percentage>` denotes and roughly
   what `|`, `||`, `&&`, juxtaposition, `?`, `+`, `*`, `{n,m}`, and `#` mean,
   but have not memorized the spec. Name the operator or production a factory
   corresponds to, gloss it in a few words where that meaning is load-bearing,
   and link the spec for the rest — don't reproduce the grammar, and don't
   assume mastery of its edge cases.
-- *Not the audience for parser internals.* The streaming protocol (`init` /
+- _Not the audience for parser internals._ The streaming protocol (`init` /
   `feed` / `read`, the token stream, branch state) is irrelevant to this
   reader. Keep it out of consumer-facing docs entirely; it lives in inline
   comments in the internal modules, for maintainers.

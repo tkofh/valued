@@ -1,5 +1,5 @@
 ---
-"valued": patch
+'valued': patch
 ---
 
 Fix `between` and `exactly` accepting one match beyond `maxLength` in the space-separated case, so `between(p, { minLength, maxLength })` and `exactly(p, n)` now reject inputs longer than their bound. The comma-separated path was already correct.
