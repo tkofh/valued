@@ -11,6 +11,7 @@ import {
 } from '../src/data/length-percentage.ts'
 import { number, numberValue } from '../src/data/number.ts'
 import { between } from '../src/multipliers/between.ts'
+import { exactly } from '../src/multipliers/exactly.ts'
 import { oneOrMore } from '../src/multipliers/oneOrMore.ts'
 import { optional } from '../src/multipliers/optional.ts'
 import { zeroOrMore } from '../src/multipliers/zeroOrMore.ts'
@@ -822,5 +823,52 @@ describe('between', () => {
     test('treats `foo, foo, foo, foo, foo` as invalid for `foo#{2,4}`', () => {
       expect(parse('foo, foo, foo, foo, foo', parser)).toEqual(invalid())
     })
+  })
+
+  describe('space-separated', () => {
+    const parser = between(keyword('foo'), { minLength: 2, maxLength: 4 })
+
+    test('treats `foo` as invalid for `foo{2,4}`', () => {
+      expect(parse('foo', parser)).toEqual(invalid())
+    })
+
+    test('treats `foo foo` as valid for `foo{2,4}`', () => {
+      expect(parse('foo foo', parser)).toEqual(
+        valid([keywordValue('foo'), keywordValue('foo')]),
+      )
+    })
+
+    test('treats `foo foo foo foo` as valid for `foo{2,4}`', () => {
+      expect(parse('foo foo foo foo', parser)).toEqual(
+        valid([
+          keywordValue('foo'),
+          keywordValue('foo'),
+          keywordValue('foo'),
+          keywordValue('foo'),
+        ]),
+      )
+    })
+
+    test('treats `foo foo foo foo foo` as invalid for `foo{2,4}`', () => {
+      expect(parse('foo foo foo foo foo', parser)).toEqual(invalid())
+    })
+  })
+})
+
+describe('exactly', () => {
+  const parser = exactly(keyword('foo'), 2)
+
+  test('treats `foo` as invalid for `foo{2}`', () => {
+    expect(parse('foo', parser)).toEqual(invalid())
+  })
+
+  test('treats `foo foo` as valid for `foo{2}`', () => {
+    expect(parse('foo foo', parser)).toEqual(
+      valid([keywordValue('foo'), keywordValue('foo')]),
+    )
+  })
+
+  test('treats `foo foo foo` as invalid for `foo{2}`', () => {
+    expect(parse('foo foo foo', parser)).toEqual(invalid())
   })
 })

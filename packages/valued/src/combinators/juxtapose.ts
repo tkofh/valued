@@ -64,6 +64,7 @@ type FilterNever<T extends ReadonlyArray<unknown>> = T extends [
 type JuxtaposeItemValue<Item extends AnyParser | string> =
   Item extends AnyParser ? ParserValue<Item> : never
 
+/** Implementation helper behind {@link JuxtaposeValue}. */
 export type InternalJuxtaposeValue<
   Parsers extends ReadonlyArray<AnyParser | string>,
   Values extends ReadonlyArray<unknown> = [],
@@ -74,6 +75,10 @@ export type InternalJuxtaposeValue<
       [...Values, JuxtaposeItemValue<Parsers[Values['length']]>]
     >
 
+/**
+ * The value type of a {@link juxtapose} parser: a tuple of each parser entry's
+ * value in order, with string-literal entries omitted.
+ */
 export type JuxtaposeValue<Parsers extends ReadonlyArray<AnyParser | string>> =
   InternalJuxtaposeValue<Parsers>
 
@@ -93,6 +98,10 @@ type InternalJuxtaposeInput<
       [...Inputs, JuxtaposeItemInput<Parsers[Inputs['length']]>]
     >
 
+/**
+ * The accepted-input type of a {@link juxtapose} parser: each entry's input
+ * joined by single spaces.
+ */
 export type JuxtaposeInput<Parsers extends ReadonlyArray<AnyParser | string>> =
   InternalJuxtaposeInput<Parsers>
 
@@ -200,6 +209,7 @@ class Juxtapose<
   }
 }
 
+/** The parser type returned by {@link juxtapose}. */
 export type { Juxtapose }
 
 type JuxtaposeConstructor = {
@@ -213,6 +223,31 @@ type JuxtaposeConstructor = {
   ) => Parser<JuxtaposeValue<Parsers>, Input>
 }
 
+/**
+ * Match `parsers` as a space-separated sequence, in order — juxtaposition in
+ * the Value Definition Syntax.
+ *
+ * Each entry is a parser or a string literal. Parsers contribute their value
+ * to the result tuple, in order; string literals must appear in the input but
+ * drop out of the output, so they read as required punctuation or fixed
+ * keywords. A nested `juxtapose` is flattened into its parent.
+ *
+ * @param parsers - the sequence of parsers and literal strings; must be
+ * non-empty
+ * @returns a parser yielding a tuple of the parsers' values, literals omitted
+ * @throws {RangeError} if `parsers` is empty
+ *
+ * @example
+ * ```ts
+ * // <length> <length>
+ * const point = juxtapose([length(), length()])
+ * parse('10px 20px', point) // [LengthValue, LengthValue]
+ *
+ * // <length> / <length> — the '/' is required but not returned
+ * const aspect = juxtapose([length(), '/', length()])
+ * parse('16px / 24px', aspect) // [LengthValue, LengthValue]
+ * ```
+ */
 const juxtapose: JuxtaposeConstructor = (<
   const Parsers extends ReadonlyArray<AnyParser | string>,
 >(
@@ -220,6 +255,11 @@ const juxtapose: JuxtaposeConstructor = (<
 ): Parser<JuxtaposeValue<Parsers>, JuxtaposeInput<Parsers>> =>
   new Juxtapose(parsers) as never) as JuxtaposeConstructor
 
+/**
+ * Build a {@link juxtapose} parser whose accepted-input type is a fixed string
+ * you supply, rather than the one inferred from the sequence. Runtime behavior
+ * is identical; only the compile-time input type changes.
+ */
 juxtapose.withInput = (<Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser | string>>(
     parsers: Parsers,

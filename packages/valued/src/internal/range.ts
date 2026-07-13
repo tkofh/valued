@@ -266,6 +266,16 @@ export class Range<
       return null
     }
 
+    // `current` holds a complete value and `token` begins a fresh one, so the
+    // match count is s.values.length (committed) + 1 (current). Refuse the new
+    // value once that already reaches maxLength — read() appends `current` to
+    // `values`, so without this the non-comma path would accept maxLength + 1.
+    // The comma-separated path commits `current` on each comma and is bounded
+    // by the maxLength guard at the top of feed(); it never reaches here.
+    if (this.maxLength !== false && s.values.length + 1 >= this.maxLength) {
+      return null
+    }
+
     const fresh = this.parser.feed(this.parser.init(), token)
     if (fresh === null) {
       return null

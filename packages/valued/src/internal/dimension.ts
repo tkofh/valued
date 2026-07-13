@@ -13,7 +13,19 @@ export interface InternalDimensionValue<Unit extends string> {
 export type InternalDimensionInput<Units extends string> = `${number}${Units}`
 
 export interface InternalDimensionOptions {
+  /**
+   * Reject values whose numeric part is below this bound (inclusive). `false`,
+   * `null`, or omitted leaves the lower end unbounded.
+   *
+   * @default undefined
+   */
   minValue?: number | false | null | undefined
+  /**
+   * Reject values whose numeric part is above this bound (inclusive). `false`,
+   * `null`, or omitted leaves the upper end unbounded.
+   *
+   * @default undefined
+   */
   maxValue?: number | false | null | undefined
 }
 

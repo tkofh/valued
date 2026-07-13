@@ -19,8 +19,10 @@ const frequencyPercentageUnits = new Set([
 type FrequencyPercentageUnits = typeof frequencyPercentageUnits
 type FrequencyPercentageUnit = ValuesOfSet<FrequencyPercentageUnits>
 
+/** The accepted-input type of a {@link frequencyPercentage} parser: a number followed by a frequency unit or `%`. */
 export type FrequencyPercentageInput = `${number}${FrequencyPercentageUnit}`
 
+/** The value a {@link frequencyPercentage} parser yields: a numeric `.value` with its `.unit`. */
 class FrequencyPercentageValue implements InternalDimensionValue<FrequencyPercentageUnit> {
   readonly [TypeBrand] = TypeBrand
 
@@ -37,6 +39,7 @@ class FrequencyPercentageValue implements InternalDimensionValue<FrequencyPercen
   }
 }
 
+/** Construct a {@link FrequencyPercentageValue} directly — the value a {@link frequencyPercentage} parser yields. */
 export function frequencyPercentageValue(
   value: number,
   unit: FrequencyPercentageUnit,
@@ -44,6 +47,7 @@ export function frequencyPercentageValue(
   return new FrequencyPercentageValue(value, unit)
 }
 
+/** Type guard for {@link FrequencyPercentageValue}, as produced by a {@link frequencyPercentage} parser. */
 export function isFrequencyPercentageValue(
   value: unknown,
 ): value is FrequencyPercentageValue {
@@ -52,6 +56,7 @@ export function isFrequencyPercentageValue(
 
 interface FrequencyPercentageOptions extends InternalDimensionOptions {}
 
+/** The parser type returned by {@link frequencyPercentage}. */
 class FrequencyPercentageParser
   extends InternalDimensionParser<
     FrequencyPercentageUnits,
@@ -71,6 +76,22 @@ class FrequencyPercentageParser
 
 export type { FrequencyPercentageParser, FrequencyPercentageValue }
 
+/**
+ * Parse a CSS
+ * [`<frequency-percentage>`](https://www.w3.org/TR/css-values-4/#typedef-frequency-percentage)
+ * — a {@link frequency} or a {@link percentage}.
+ *
+ * Pass `minValue` / `maxValue` to constrain the numeric part (both inclusive).
+ *
+ * @param options - optional inclusive `minValue` / `maxValue` bounds
+ * @returns a parser yielding a {@link FrequencyPercentageValue}
+ *
+ * @example
+ * ```ts
+ * parse('50%', frequencyPercentage())   // .value === 50, .unit === '%'
+ * parse('440Hz', frequencyPercentage()) // .value === 440, .unit === 'Hz'
+ * ```
+ */
 export function frequencyPercentage(
   options?: FrequencyPercentageOptions,
 ): Parser<FrequencyPercentageValue, FrequencyPercentageInput> {

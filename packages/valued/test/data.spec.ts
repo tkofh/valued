@@ -5,6 +5,7 @@ import { dimension, dimensionValue } from '../src/data/dimension.ts'
 import { keyword, keywordValue } from '../src/data/keyword.ts'
 import { length, lengthValue } from '../src/data/length.ts'
 import { lengthPercentageValue } from '../src/data/length-percentage.ts'
+import { integer, integerValue } from '../src/data/integer.ts'
 import { number, numberValue } from '../src/data/number.ts'
 import { position } from '../src/data/position.ts'
 import { parse } from '../src/parse.ts'
@@ -47,6 +48,27 @@ describe('number', () => {
 
   for (const [input, value] of cases) {
     const parser = number()
+    test(`treats \`${input}\` as ${value.valid ? 'valid' : 'invalid'}`, () => {
+      expect(parse(input, parser)).toEqual(value)
+    })
+  }
+})
+
+describe('integer', () => {
+  const cases = [
+    ['10', valid(integerValue(10))],
+    ['-10', valid(integerValue(-10))],
+    ['0', valid(integerValue(0))],
+    ['1.5', invalid()],
+    ['foo', invalid()],
+    // whole numbers beyond the 32-bit range must still parse
+    ['2147483647', valid(integerValue(2147483647))],
+    ['2147483648', valid(integerValue(2147483648))],
+    ['3000000000', valid(integerValue(3000000000))],
+  ] as const
+
+  for (const [input, value] of cases) {
+    const parser = integer()
     test(`treats \`${input}\` as ${value.valid ? 'valid' : 'invalid'}`, () => {
       expect(parse(input, parser)).toEqual(value)
     })

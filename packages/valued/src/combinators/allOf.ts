@@ -47,6 +47,10 @@ type InternalAllOfInput<
       [...Inputs, ParserInput<Parsers[Inputs['length']]>]
     >
 
+/**
+ * The accepted-input type of an {@link allOf} parser: every ordering of the
+ * parsers' inputs, space-separated.
+ */
 export type AllOfInput<T extends ReadonlyArray<AnyParser>> =
   InternalAllOfInput<T>
 
@@ -60,6 +64,10 @@ type InternalAllOfValue<
       [...Values, ParserValue<Parsers[Values['length']]>]
     >
 
+/**
+ * The value type of an {@link allOf} parser: a tuple of every parser's value,
+ * in declaration order.
+ */
 export type AllOfValue<Parsers extends ReadonlyArray<AnyParser>> =
   InternalAllOfValue<Parsers>
 
@@ -229,6 +237,7 @@ class AllOf<
   }
 }
 
+/** The parser type returned by {@link allOf}. */
 export type { AllOf }
 
 type AllOfConstructor = {
@@ -242,11 +251,38 @@ type AllOfConstructor = {
   ) => Parser<AllOfValue<Parsers>, Input>
 }
 
+/**
+ * Match every one of `parsers`, in any order — the `&&` combinator from the
+ * Value Definition Syntax.
+ *
+ * Every parser must match. The input may present them in any order, but the
+ * result tuple is always in the order `parsers` were declared. If any parser
+ * has no match, the whole `allOf` fails.
+ *
+ * @param parsers - the parsers that must all match; must be non-empty
+ * @returns a parser yielding a tuple of every parser's value, in declaration
+ * order
+ * @throws {TypeError} if `parsers` is empty
+ *
+ * @example
+ * ```ts
+ * // <color> && <length>
+ * const colorAndLength = allOf([color(), length()])
+ *
+ * parse('red 12px', colorAndLength) // [ColorValue, LengthValue]
+ * parse('12px red', colorAndLength) // [ColorValue, LengthValue] — same order out
+ * ```
+ */
 const allOf = (<const Parsers extends ReadonlyArray<AnyParser>>(
   parsers: Parsers,
 ): Parser<AllOfValue<Parsers>, AllOfInput<Parsers>> =>
   new AllOf(parsers) as never) as AllOfConstructor
 
+/**
+ * Build an {@link allOf} parser whose accepted-input type is a fixed string
+ * you supply, rather than the one inferred from the parsers. Runtime behavior
+ * is identical; only the compile-time input type changes.
+ */
 allOf.withInput =
   <Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser>>(

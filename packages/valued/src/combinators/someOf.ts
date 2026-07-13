@@ -65,6 +65,10 @@ type InternalSomeOfValue<
       [...Values, ParserValue<Parsers[Values['length']]> | null]
     >
 
+/**
+ * The value type of a {@link someOf} parser: a tuple in declaration order with
+ * one slot per parser — that parser's value, or `null` where it was omitted.
+ */
 export type SomeOfValue<Parsers extends ReadonlyArray<AnyParser>> =
   InternalSomeOfValue<Parsers>
 
@@ -78,6 +82,10 @@ type InternalSomeOfInput<
       [...Inputs, ParserInput<Parsers[Inputs['length']]>]
     >
 
+/**
+ * The accepted-input type of a {@link someOf} parser: every ordering of every
+ * non-empty subset of the parsers' inputs, space-separated.
+ */
 export type SomeOfInput<Parsers extends ReadonlyArray<AnyParser>> =
   InternalSomeOfInput<Parsers, []>
 
@@ -252,6 +260,7 @@ class SomeOf<
   }
 }
 
+/** The parser type returned by {@link someOf}. */
 export type { SomeOf }
 
 type SomeOfConstructor = {
@@ -265,6 +274,31 @@ type SomeOfConstructor = {
   ) => Parser<SomeOfValue<Parsers>, Input>
 }
 
+/**
+ * Match at least one of `parsers`, in any order — the `||` combinator from the
+ * Value Definition Syntax.
+ *
+ * Any non-empty subset of the parsers may match, in any order, but at least
+ * one must. The result is always a tuple in declaration order with one slot
+ * per parser: that parser's value where it matched, or `null` where it was
+ * omitted.
+ *
+ * @param parsers - the parsers, at least one of which must match; must be
+ * non-empty
+ * @returns a parser yielding a tuple of each parser's value or `null`, in
+ * declaration order
+ * @throws {RangeError} if `parsers` is empty
+ *
+ * @example
+ * ```ts
+ * // <line-width> || <line-style> || <color>
+ * const border = someOf([length(), lineStyle(), color()])
+ *
+ * parse('1px solid red', border) // [LengthValue, LineStyleValue, ColorValue]
+ * parse('solid red', border)     // [null, LineStyleValue, ColorValue]
+ * parse('red', border)           // [null, null, ColorValue]
+ * ```
+ */
 const someOf: SomeOfConstructor = (<
   const Parsers extends ReadonlyArray<AnyParser>,
 >(
@@ -272,6 +306,11 @@ const someOf: SomeOfConstructor = (<
 ): Parser<SomeOfValue<Parsers>, SomeOfInput<Parsers>> =>
   new SomeOf(parsers) as never) as SomeOfConstructor
 
+/**
+ * Build a {@link someOf} parser whose accepted-input type is a fixed string
+ * you supply, rather than the one inferred from the parsers. Runtime behavior
+ * is identical; only the compile-time input type changes.
+ */
 someOf.withInput = (<Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,

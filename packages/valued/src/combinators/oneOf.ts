@@ -7,10 +7,18 @@ import {
 } from '../parser.ts'
 import type { Token } from '../tokenizer.ts'
 
+/**
+ * The accepted-input type of a {@link oneOf} parser: the union of each
+ * alternative's input.
+ */
 export type OneOfInput<Parsers extends ReadonlyArray<AnyParser>> = ParserInput<
   Parsers[number]
 >
 
+/**
+ * The value type of a {@link oneOf} parser: the union of each alternative's
+ * value.
+ */
 export type OneOfValue<Parsers extends ReadonlyArray<AnyParser>> = ParserValue<
   Parsers[number]
 >
@@ -75,6 +83,7 @@ class OneOf<
   }
 }
 
+/** The parser type returned by {@link oneOf}. */
 export type { OneOf }
 
 type OneOfConstructor = {
@@ -88,6 +97,28 @@ type OneOfConstructor = {
   ) => Parser<OneOfValue<Parsers>, Input>
 }
 
+/**
+ * Match exactly one of `parsers` — the `|` combinator from the Value
+ * Definition Syntax.
+ *
+ * Alternatives are tried in list order, and the result is the value of the
+ * first one to match, typed as the union of the alternatives' values. Order
+ * therefore matters when two alternatives can accept the same input: list the
+ * one you want to win first.
+ *
+ * @param parsers - the alternatives, in priority order; must be non-empty
+ * @returns a parser yielding the matched alternative's value
+ * @throws {TypeError} if `parsers` is empty
+ *
+ * @example
+ * ```ts
+ * // auto | <length>
+ * const widthish = oneOf([keyword('auto'), length()])
+ *
+ * parse('auto', widthish) // { valid: true, value: KeywordValue<'auto'> }
+ * parse('12px', widthish) // { valid: true, value: LengthValue<'px'> }
+ * ```
+ */
 const oneOf: OneOfConstructor = (<
   const Parsers extends ReadonlyArray<AnyParser>,
 >(
@@ -95,6 +126,22 @@ const oneOf: OneOfConstructor = (<
 ): Parser<OneOfValue<Parsers>, OneOfInput<Parsers>> =>
   new OneOf(parsers) as never) as OneOfConstructor
 
+/**
+ * Build a {@link oneOf} parser whose accepted-input type is a fixed string you
+ * supply, rather than the union inferred from the alternatives.
+ *
+ * An escape hatch for when the inferred input type is wider than you want to
+ * expose, or expensive to compute. Runtime behavior is identical to
+ * {@link oneOf}; only the compile-time input type changes.
+ *
+ * @example
+ * ```ts
+ * const widthish = oneOf.withInput<'auto' | `${number}px`>()([
+ *   keyword('auto'),
+ *   length.subset(['px']),
+ * ])
+ * ```
+ */
 oneOf.withInput = (<Input extends string>() =>
   <const Parsers extends ReadonlyArray<AnyParser>>(
     parsers: Parsers,

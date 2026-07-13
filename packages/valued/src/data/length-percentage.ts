@@ -64,9 +64,14 @@ const lengthPercentageUnits = new Set([
 type LengthPercentageUnits = typeof lengthPercentageUnits
 type LengthPercentageUnit = ValuesOfSet<LengthPercentageUnits>
 
+/** The accepted-input type of a {@link lengthPercentage} parser: a number followed by one of `Unit`. */
 export type LengthPercentageInput<Unit extends LengthPercentageUnit> =
   `${number}${Unit}`
 
+/**
+ * The value a {@link lengthPercentage} parser yields: a numeric `.value` with a
+ * `.unit` that is `'%'` or one of the length units.
+ */
 class LengthPercentageValue<
   Unit extends LengthPercentageUnit,
 > implements InternalDimensionValue<Unit> {
@@ -85,6 +90,7 @@ class LengthPercentageValue<
   }
 }
 
+/** Construct a {@link LengthPercentageValue} directly — the value a {@link lengthPercentage} parser yields. */
 export function lengthPercentageValue<Unit extends LengthPercentageUnit>(
   value: number,
   unit: Unit,
@@ -92,6 +98,7 @@ export function lengthPercentageValue<Unit extends LengthPercentageUnit>(
   return new LengthPercentageValue(value, unit)
 }
 
+/** Type guard for {@link LengthPercentageValue}, as produced by a {@link lengthPercentage} parser. */
 export function isLengthPercentageValue<Unit extends LengthPercentageUnit>(
   value: unknown,
 ): value is LengthPercentageValue<Unit> {
@@ -100,6 +107,7 @@ export function isLengthPercentageValue<Unit extends LengthPercentageUnit>(
 
 interface LengthPercentageOptions extends InternalDimensionOptions {}
 
+/** The parser type returned by {@link lengthPercentage} and {@link lengthPercentage.subset}. */
 class LengthPercentageParser<Units extends ReadonlySet<LengthPercentageUnit>>
   extends InternalDimensionParser<
     Units,
@@ -130,6 +138,25 @@ type LengthPercentageConstructor = {
   >
 }
 
+/**
+ * Parse a CSS
+ * [`<length-percentage>`](https://www.w3.org/TR/css-values-4/#typedef-length-percentage)
+ * — a {@link length} or a {@link percentage}, i.e. a number followed by a
+ * length unit or by `%`.
+ *
+ * A unit is required: unitless input, including `0`, does not match. Pass
+ * `minValue` / `maxValue` to constrain the numeric part (both inclusive). To
+ * accept only some units, use {@link lengthPercentage.subset}.
+ *
+ * @param options - optional inclusive `minValue` / `maxValue` bounds
+ * @returns a parser yielding a {@link LengthPercentageValue}
+ *
+ * @example
+ * ```ts
+ * parse('50%', lengthPercentage())  // .value === 50, .unit === '%'
+ * parse('10px', lengthPercentage()) // .value === 10, .unit === 'px'
+ * ```
+ */
 const lengthPercentage = ((
   options?: LengthPercentageOptions,
 ): Parser<
@@ -141,6 +168,25 @@ const lengthPercentage = ((
     options,
   ) as never) as LengthPercentageConstructor
 
+/**
+ * Parse a `<length-percentage>` restricted to `units` — a
+ * {@link lengthPercentage} parser that accepts only the listed units (`'%'`
+ * included or not, as you choose).
+ *
+ * Names that are not length-or-percentage units are dropped from the set, so a
+ * parser built from an all-unknown list matches nothing.
+ *
+ * @param units - the units to accept
+ * @param options - optional inclusive `minValue` / `maxValue` bounds
+ * @returns a parser yielding a {@link LengthPercentageValue} over the listed units
+ *
+ * @example
+ * ```ts
+ * const pxOrPercent = lengthPercentage.subset(['px', '%'])
+ * parse('2px', pxOrPercent) // .unit === 'px'
+ * parse('2em', pxOrPercent) // { valid: false } — 'em' not in the subset
+ * ```
+ */
 lengthPercentage.subset = (<const Units extends ReadonlyArray<string>>(
   units: Units,
   options?: LengthPercentageOptions,
