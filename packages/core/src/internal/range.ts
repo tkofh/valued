@@ -1,8 +1,8 @@
-import {
-  type AnyParser,
-  type InternalParser,
-  type ParserInput,
-  type ParserValue,
+import type {
+  AnyParser,
+  InternalParser,
+  ParserInput,
+  ParserValue,
 } from '../parser.ts'
 import type { Token } from '../tokenizer.ts'
 
