@@ -1,5 +1,11 @@
 # valued
 
+## 0.4.9
+
+### Patch Changes
+
+- 5029cbd: Move releases to the Changesets GitHub Action with npm trusted publishing (no functional changes)
+
 ## 0.4.8
 
 ### Patch Changes
