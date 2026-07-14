@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'vitest'
+import { allOf } from '../src/combinators/allOf.ts'
 import { angle, angleValue } from '../src/data/angle.ts'
 import { color, colorValue } from '../src/data/color.ts'
 import { dimension, dimensionValue } from '../src/data/dimension.ts'
-import { keyword, keywordValue } from '../src/data/keyword.ts'
+import { keyword, keywords, keywordValue } from '../src/data/keyword.ts'
 import { length, lengthValue } from '../src/data/length.ts'
 import { lengthPercentageValue } from '../src/data/length-percentage.ts'
 import { integer, integerValue } from '../src/data/integer.ts'
@@ -87,6 +88,44 @@ describe('keyword', () => {
       expect(parse(input, parser)).toEqual(value)
     })
   }
+})
+
+describe('keyword.text', () => {
+  const cases = [
+    ['auto', 'auto', valid('auto')],
+    ['auto', 'none', invalid()],
+  ] as const
+
+  for (const [word, input, value] of cases) {
+    const parser = keyword.text(word)
+    test(`treats \`${input}\` as ${value.valid ? 'valid' : 'invalid'}`, () => {
+      expect(parse(input, parser)).toEqual(value)
+    })
+  }
+})
+
+describe('keywords.text', () => {
+  const parser = keywords.text(['start', 'center', 'end'])
+  const cases = [
+    ['start', valid('start')],
+    ['center', valid('center')],
+    ['stretch', invalid()],
+  ] as const
+
+  for (const [input, value] of cases) {
+    test(`treats \`${input}\` as ${value.valid ? 'valid' : 'invalid'}`, () => {
+      expect(parse(input, parser)).toEqual(value)
+    })
+  }
+
+  test('composes into a string tuple through allOf, no unwrapping', () => {
+    const pair = allOf([
+      keywords.text(['top', 'center', 'bottom']),
+      keywords.text(['left', 'right']),
+    ])
+    expect(parse('top left', pair)).toEqual(valid(['top', 'left']))
+    expect(parse('left top', pair)).toEqual(valid(['top', 'left']))
+  })
 })
 
 describe('color', () => {

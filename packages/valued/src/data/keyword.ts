@@ -1,3 +1,4 @@
+import { map } from '../mappers/map.ts'
 import type { InternalParser, Parser } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'
@@ -75,12 +76,27 @@ class KeywordParser<Value extends string> implements InternalParser<
 
 export type { KeywordParser, KeywordValue }
 
+type KeywordConstructor = {
+  <const Value extends string>(value: Value): Parser<KeywordValue<Value>, Value>
+  text<const Value extends string>(value: Value): Parser<Value, Value>
+}
+
+type KeywordsConstructor = {
+  <const Values extends ReadonlyArray<string>>(
+    values: Values,
+  ): Parser<KeywordValue<Values[number]>, Values[number]>
+  text<const Values extends ReadonlyArray<string>>(
+    values: Values,
+  ): Parser<Values[number], Values[number]>
+}
+
 /**
  * Match a single literal keyword — a fixed identifier such as `auto` or
  * `none`.
  *
  * The keyword is carried in the type, so the result narrows to
- * `KeywordValue<'auto'>` rather than `KeywordValue<string>`.
+ * `KeywordValue<'auto'>` rather than `KeywordValue<string>`. For the bare
+ * string in place of the wrapper, use {@link keyword.text}.
  *
  * @param value - the exact keyword to match
  * @returns a parser yielding a {@link KeywordValue} for `value`
@@ -91,11 +107,33 @@ export type { KeywordParser, KeywordValue }
  * parse('none', keyword('auto')) // { valid: false }
  * ```
  */
-export function keyword<const Value extends string>(
+const keyword = (<const Value extends string>(
   value: Value,
-): Parser<KeywordValue<Value>, Value> {
-  return new KeywordParser(new Set([value])) as never
-}
+): Parser<KeywordValue<Value>, Value> =>
+  new KeywordParser(new Set([value])) as never) as KeywordConstructor
+
+/**
+ * Match the keyword `value`, yielding the bare string in place of a
+ * {@link KeywordValue} wrapper.
+ *
+ * A shortcut for `map(keyword(value), (v) => v.value)`: the grammar is
+ * identical, but the parsed value is the keyword string itself, so it lands in
+ * a string-typed result without a later unwrap. Reach for it when you want the
+ * identifier rather than the value object — most often as an {@link allOf} or
+ * {@link oneOf} branch whose {@link KeywordValue} you would otherwise unwrap.
+ *
+ * @param value - the exact keyword to match
+ * @returns a parser yielding the matched keyword as a string
+ *
+ * @example
+ * ```ts
+ * parse('auto', keyword.text('auto')) // 'auto'
+ * ```
+ */
+keyword.text = (<const Value extends string>(
+  value: Value,
+): Parser<Value, Value> =>
+  map(keyword(value), (v) => v.value) as never) as KeywordConstructor['text']
 
 /**
  * Match any one of a fixed set of keywords — the `|` of several literal
@@ -103,7 +141,8 @@ export function keyword<const Value extends string>(
  *
  * The result type is the union of the listed keywords, so it narrows to
  * exactly the values you passed. Use this for a closed keyword set;
- * {@link keyword} for a single literal.
+ * {@link keyword} for a single literal, or {@link keywords.text} for the bare
+ * strings in place of {@link KeywordValue} wrappers.
  *
  * @param values - the keywords to accept
  * @returns a parser yielding a {@link KeywordValue} for the matched keyword
@@ -115,8 +154,32 @@ export function keyword<const Value extends string>(
  * parse('stretch', align) // { valid: false }
  * ```
  */
-export function keywords<const Values extends ReadonlyArray<string>>(
+const keywords = (<const Values extends ReadonlyArray<string>>(
   values: Values,
-): Parser<KeywordValue<Values[number]>, Values[number]> {
-  return new KeywordParser(new Set(values)) as never
-}
+): Parser<KeywordValue<Values[number]>, Values[number]> =>
+  new KeywordParser(new Set(values)) as never) as KeywordsConstructor
+
+/**
+ * Match any one of `values`, yielding the bare string in place of a
+ * {@link KeywordValue} wrapper — the string form of {@link keywords}.
+ *
+ * A shortcut for `map(keywords(values), (v) => v.value)`. The result narrows to
+ * the union of the listed keywords, so a grammar assembled from `.text` parsers
+ * yields plain strings — and, through {@link allOf} or {@link juxtapose},
+ * tuples of strings — with no unwrapping.
+ *
+ * @param values - the keywords to accept
+ * @returns a parser yielding the matched keyword as a string
+ *
+ * @example
+ * ```ts
+ * const axis = keywords.text(['start', 'center', 'end'])
+ * parse('center', axis) // 'center', typed 'start' | 'center' | 'end'
+ * ```
+ */
+keywords.text = (<const Values extends ReadonlyArray<string>>(
+  values: Values,
+): Parser<Values[number], Values[number]> =>
+  map(keywords(values), (v) => v.value) as never) as KeywordsConstructor['text']
+
+export { keyword, keywords }

@@ -1,3 +1,4 @@
+import { map } from '../mappers/map.ts'
 import type {
   AnyParser,
   InternalParser,
@@ -10,6 +11,7 @@ import type { Token } from '../tokenizer.ts'
 import type {
   ExactCombinatorFits,
   LooseCombinatorInput,
+  StructInput,
 } from '../internal/union.ts'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends [string]
@@ -84,6 +86,14 @@ type InternalAllOfValue<
 export type AllOfValue<Parsers extends ReadonlyArray<AnyParser>> =
   InternalAllOfValue<Parsers>
 
+/**
+ * The value type of an {@link allOf.struct} parser: an object with `Shape`'s
+ * keys, each holding that field parser's value.
+ */
+export type AllOfStructValue<Shape extends Record<string, AnyParser>> = {
+  [Key in keyof Shape]: ParserValue<Shape[Key]>
+}
+
 const TypeBrand: unique symbol = Symbol('combinators/allOf')
 
 function isAllOf(value: unknown): value is AllOf<ReadonlyArray<AnyParser>> {
@@ -115,19 +125,16 @@ class AllOf<
       throw new TypeError('allOf() parser must have at least one parser')
     }
 
-    const seen = new Set<AnyParser>()
+    // Flatten a nested allOf into its parent (`&&` is associative), but keep
+    // every operand as its own slot — no dedup. State is tracked by position,
+    // so a parser reused across slots is safe, and the result arity matches the
+    // number of operands regardless of instance identity.
     const storage: Array<AnyParser> = []
 
     for (const parser of parsers) {
       if (isAllOf(parser)) {
-        for (const child of parser.parsers) {
-          if (!seen.has(child)) {
-            seen.add(child)
-            storage.push(child)
-          }
-        }
-      } else if (!seen.has(parser)) {
-        seen.add(parser)
+        storage.push(...parser.parsers)
+      } else {
         storage.push(parser)
       }
     }
@@ -262,6 +269,9 @@ type AllOfConstructor = {
   >(
     parsers: Parsers,
   ) => Parser<AllOfValue<Parsers>, Input>
+  struct<const Shape extends Record<string, AnyParser>>(
+    shape: Shape,
+  ): Parser<AllOfStructValue<Shape>, StructInput<Shape>>
 }
 
 /**
@@ -302,5 +312,47 @@ allOf.withInput =
     parsers: Parsers,
   ): Parser<AllOfValue<Parsers>, Input> =>
     new AllOf(parsers) as never
+
+/**
+ * Match every field's parser, in any order, yielding an object keyed by the
+ * field names — the object form of {@link allOf}.
+ *
+ * Each value in `shape` is a parser; the result is an object with the same keys
+ * holding each parser's value. Because `allOf` matches in any order, only the
+ * key/parser pairing carries meaning, and it is written at the declaration site
+ * — so, unlike keying a positional result after the fact, there is no separate
+ * list of names to keep aligned with the parsers.
+ *
+ * @param shape - an object mapping field names to parsers; must be non-empty
+ * @returns a parser yielding an object of each field's value
+ * @throws {TypeError} if `shape` has no fields
+ *
+ * @example
+ * ```ts
+ * const bg = allOf.struct({ attachment: keyword('fixed'), size: length() })
+ *
+ * const result = parse('fixed 10px', bg)
+ * if (result.valid) {
+ *   result.value.attachment // KeywordValue<'fixed'>
+ *   result.value.size       // LengthValue
+ * }
+ *
+ * parse('10px fixed', bg) // the same object — order-independent
+ * ```
+ */
+allOf.struct = (<const Shape extends Record<string, AnyParser>>(
+  shape: Shape,
+): Parser<AllOfStructValue<Shape>, StructInput<Shape>> => {
+  const keys = Object.keys(shape)
+  const parsers = keys.map((key) => shape[key] as AnyParser)
+  return map(allOf(parsers), (values) => {
+    const tuple = values as ReadonlyArray<unknown>
+    const result: Record<string, unknown> = {}
+    for (let index = 0; index < keys.length; index++) {
+      result[keys[index] as string] = tuple[index]
+    }
+    return result
+  }) as never
+}) as AllOfConstructor['struct']
 
 export { allOf }
