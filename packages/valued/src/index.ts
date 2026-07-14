@@ -31,3 +31,7 @@ export { exactly } from './multipliers/exactly.ts'
 export type { ExactlyInput, ExactlyValue } from './multipliers/exactly.ts'
 export { between } from './multipliers/between.ts'
 export type { BetweenInput, BetweenValue } from './multipliers/between.ts'
+
+// Mappers — value transformers, not Value Definition Syntax operators: they
+// reshape a parser's output while leaving the grammar it accepts unchanged.
+export { map } from './mappers/map.ts'
