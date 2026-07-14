@@ -172,15 +172,10 @@ Each data type lives at its own subpath, so you only pay for what you import —
 
 Prebuilt `keywords([...])` for specific properties. Reach for one, or roll your own with `keywords([...])` from `valued/data/keyword`.
 
-| Import                       | Spec               |
-| ---------------------------- | ------------------ |
-| `valued/data/absolute-size`  | `<absolute-size>`  |
-| `valued/data/relative-size`  | `<relative-size>`  |
-| `valued/data/generic-family` | `<generic-family>` |
-| `valued/data/blend-mode`     | `<blend-mode>`     |
-| `valued/data/line-style`     | `<line-style>`     |
-| `valued/data/display`        | `<display>`        |
-| `valued/data/overflow`       | `<overflow>`       |
+| Import                   | Spec           |
+| ------------------------ | -------------- |
+| `valued/data/line-style` | `<line-style>` |
+| `valued/data/display`    | `<display>`    |
 
 ### Composite grammars
 

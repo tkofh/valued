@@ -35,10 +35,6 @@
       "import": "./dist/vue.mjs",
       "types": "./dist/vue.d.ts"
     },
-    "./data/absolute-size": {
-      "import": "./dist/data/absolute-size.mjs",
-      "types": "./dist/data/absolute-size.d.ts"
-    },
     "./data/alpha-value": {
       "import": "./dist/data/alpha-value.mjs",
       "types": "./dist/data/alpha-value.d.ts"
@@ -50,10 +46,6 @@
     "./data/angle-percentage": {
       "import": "./dist/data/angle-percentage.mjs",
       "types": "./dist/data/angle-percentage.d.ts"
-    },
-    "./data/blend-mode": {
-      "import": "./dist/data/blend-mode.mjs",
-      "types": "./dist/data/blend-mode.d.ts"
     },
     "./data/color": {
       "import": "./dist/data/color.mjs",
@@ -82,10 +74,6 @@
     "./data/frequency-percentage": {
       "import": "./dist/data/frequency-percentage.mjs",
       "types": "./dist/data/frequency-percentage.d.ts"
-    },
-    "./data/generic-family": {
-      "import": "./dist/data/generic-family.mjs",
-      "types": "./dist/data/generic-family.d.ts"
     },
     "./data/hue": {
       "import": "./dist/data/hue.mjs",
@@ -119,10 +107,6 @@
       "import": "./dist/data/number.mjs",
       "types": "./dist/data/number.d.ts"
     },
-    "./data/overflow": {
-      "import": "./dist/data/overflow.mjs",
-      "types": "./dist/data/overflow.d.ts"
-    },
     "./data/percentage": {
       "import": "./dist/data/percentage.mjs",
       "types": "./dist/data/percentage.d.ts"
@@ -134,10 +118,6 @@
     "./data/ratio": {
       "import": "./dist/data/ratio.mjs",
       "types": "./dist/data/ratio.d.ts"
-    },
-    "./data/relative-size": {
-      "import": "./dist/data/relative-size.mjs",
-      "types": "./dist/data/relative-size.d.ts"
     }
   },
   "publishConfig": {
