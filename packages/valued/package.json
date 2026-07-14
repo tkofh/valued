@@ -16,13 +16,16 @@
     "dist"
   ],
   "type": "module",
-  "main": "dist/parse.cjs",
-  "module": "dist/parse.mjs",
-  "types": "dist/parse.d.ts",
+  "sideEffects": [
+    "**/color.mjs"
+  ],
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/parse.mjs",
-      "types": "./dist/parse.d.ts"
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
     },
     "./equals": {
       "import": "./dist/equals.mjs",
@@ -135,42 +138,6 @@
     "./data/relative-size": {
       "import": "./dist/data/relative-size.mjs",
       "types": "./dist/data/relative-size.d.ts"
-    },
-    "./combinators/allOf": {
-      "import": "./dist/combinators/allOf.mjs",
-      "types": "./dist/combinators/allOf.d.ts"
-    },
-    "./combinators/juxtapose": {
-      "import": "./dist/combinators/juxtapose.mjs",
-      "types": "./dist/combinators/juxtapose.d.ts"
-    },
-    "./combinators/oneOf": {
-      "import": "./dist/combinators/oneOf.mjs",
-      "types": "./dist/combinators/oneOf.d.ts"
-    },
-    "./combinators/someOf": {
-      "import": "./dist/combinators/someOf.mjs",
-      "types": "./dist/combinators/someOf.d.ts"
-    },
-    "./multipliers/between": {
-      "import": "./dist/multipliers/between.mjs",
-      "types": "./dist/multipliers/between.d.ts"
-    },
-    "./multipliers/exactly": {
-      "import": "./dist/multipliers/exactly.mjs",
-      "types": "./dist/multipliers/exactly.d.ts"
-    },
-    "./multipliers/oneOrMore": {
-      "import": "./dist/multipliers/oneOrMore.mjs",
-      "types": "./dist/multipliers/oneOrMore.d.ts"
-    },
-    "./multipliers/optional": {
-      "import": "./dist/multipliers/optional.mjs",
-      "types": "./dist/multipliers/optional.d.ts"
-    },
-    "./multipliers/zeroOrMore": {
-      "import": "./dist/multipliers/zeroOrMore.mjs",
-      "types": "./dist/multipliers/zeroOrMore.d.ts"
     }
   },
   "publishConfig": {
