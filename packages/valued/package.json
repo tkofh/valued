@@ -16,13 +16,16 @@
     "dist"
   ],
   "type": "module",
-  "main": "dist/parse.cjs",
-  "module": "dist/parse.mjs",
-  "types": "dist/parse.d.ts",
+  "sideEffects": [
+    "**/color.mjs"
+  ],
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/parse.mjs",
-      "types": "./dist/parse.d.ts"
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
     },
     "./equals": {
       "import": "./dist/equals.mjs",
@@ -31,10 +34,6 @@
     "./vue": {
       "import": "./dist/vue.mjs",
       "types": "./dist/vue.d.ts"
-    },
-    "./data/absolute-size": {
-      "import": "./dist/data/absolute-size.mjs",
-      "types": "./dist/data/absolute-size.d.ts"
     },
     "./data/alpha-value": {
       "import": "./dist/data/alpha-value.mjs",
@@ -47,10 +46,6 @@
     "./data/angle-percentage": {
       "import": "./dist/data/angle-percentage.mjs",
       "types": "./dist/data/angle-percentage.d.ts"
-    },
-    "./data/blend-mode": {
-      "import": "./dist/data/blend-mode.mjs",
-      "types": "./dist/data/blend-mode.d.ts"
     },
     "./data/color": {
       "import": "./dist/data/color.mjs",
@@ -79,10 +74,6 @@
     "./data/frequency-percentage": {
       "import": "./dist/data/frequency-percentage.mjs",
       "types": "./dist/data/frequency-percentage.d.ts"
-    },
-    "./data/generic-family": {
-      "import": "./dist/data/generic-family.mjs",
-      "types": "./dist/data/generic-family.d.ts"
     },
     "./data/hue": {
       "import": "./dist/data/hue.mjs",
@@ -116,10 +107,6 @@
       "import": "./dist/data/number.mjs",
       "types": "./dist/data/number.d.ts"
     },
-    "./data/overflow": {
-      "import": "./dist/data/overflow.mjs",
-      "types": "./dist/data/overflow.d.ts"
-    },
     "./data/percentage": {
       "import": "./dist/data/percentage.mjs",
       "types": "./dist/data/percentage.d.ts"
@@ -131,46 +118,6 @@
     "./data/ratio": {
       "import": "./dist/data/ratio.mjs",
       "types": "./dist/data/ratio.d.ts"
-    },
-    "./data/relative-size": {
-      "import": "./dist/data/relative-size.mjs",
-      "types": "./dist/data/relative-size.d.ts"
-    },
-    "./combinators/allOf": {
-      "import": "./dist/combinators/allOf.mjs",
-      "types": "./dist/combinators/allOf.d.ts"
-    },
-    "./combinators/juxtapose": {
-      "import": "./dist/combinators/juxtapose.mjs",
-      "types": "./dist/combinators/juxtapose.d.ts"
-    },
-    "./combinators/oneOf": {
-      "import": "./dist/combinators/oneOf.mjs",
-      "types": "./dist/combinators/oneOf.d.ts"
-    },
-    "./combinators/someOf": {
-      "import": "./dist/combinators/someOf.mjs",
-      "types": "./dist/combinators/someOf.d.ts"
-    },
-    "./multipliers/between": {
-      "import": "./dist/multipliers/between.mjs",
-      "types": "./dist/multipliers/between.d.ts"
-    },
-    "./multipliers/exactly": {
-      "import": "./dist/multipliers/exactly.mjs",
-      "types": "./dist/multipliers/exactly.d.ts"
-    },
-    "./multipliers/oneOrMore": {
-      "import": "./dist/multipliers/oneOrMore.mjs",
-      "types": "./dist/multipliers/oneOrMore.d.ts"
-    },
-    "./multipliers/optional": {
-      "import": "./dist/multipliers/optional.mjs",
-      "types": "./dist/multipliers/optional.d.ts"
-    },
-    "./multipliers/zeroOrMore": {
-      "import": "./dist/multipliers/zeroOrMore.mjs",
-      "types": "./dist/multipliers/zeroOrMore.d.ts"
     }
   },
   "publishConfig": {

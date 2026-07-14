@@ -37,7 +37,19 @@ if (result.valid) {
 
 ## Combinators
 
-Each combinator corresponds to an operator in the CSS grammar.
+Each combinator corresponds to an operator in the CSS grammar. Import them — along with the multipliers below and `parse` itself — from the package root:
+
+```ts
+import {
+  parse,
+  oneOf,
+  juxtapose,
+  allOf,
+  someOf,
+  optional,
+  between,
+} from 'valued'
+```
 
 ### `oneOf` — `|`
 
@@ -121,36 +133,55 @@ parse('10px 20px 10px 20px', padding) // [LengthValue, LengthValue, LengthValue,
 
 ## Data types
 
-Each data type lives at its own subpath so you only pay for what you import.
+Each data type lives at its own subpath, so you only pay for what you import — pulling in `length` never drags along the `colorjs.io` dependency that sits behind `color`.
 
-| Import                                   | Spec                              |
-| ---------------------------------------- | --------------------------------- |
-| `valued/data/absolute-size`              | `<absolute-size>`                 |
-| `valued/data/alpha-value`                | `<alpha-value>`                   |
-| `valued/data/angle`                      | `<angle>`                         |
-| `valued/data/angle-percentage`           | `<angle-percentage>`              |
-| `valued/data/blend-mode`                 | `<blend-mode>`                    |
-| `valued/data/color`                      | `<color>`                         |
-| `valued/data/color-interpolation-method` | `<color-interpolation-method>`    |
-| `valued/data/dimension`                  | `<dimension>`                     |
-| `valued/data/display`                    | `<display>`                       |
-| `valued/data/flex`                       | `<flex>`                          |
-| `valued/data/frequency`                  | `<frequency>`                     |
-| `valued/data/frequency-percentage`       | `<frequency-percentage>`          |
-| `valued/data/generic-family`             | `<generic-family>`                |
-| `valued/data/hue`                        | `<hue>`                           |
-| `valued/data/hue-interpolation-method`   | `<hue-interpolation-method>`      |
-| `valued/data/integer`                    | `<integer>`                       |
-| `valued/data/keyword`                    | `keyword(...)`, `keywords([...])` |
-| `valued/data/length`                     | `<length>`                        |
-| `valued/data/length-percentage`          | `<length-percentage>`             |
-| `valued/data/line-style`                 | `<line-style>`                    |
-| `valued/data/number`                     | `<number>`                        |
-| `valued/data/overflow`                   | `<overflow>`                      |
-| `valued/data/percentage`                 | `<percentage>`                    |
-| `valued/data/position`                   | `<position>`                      |
-| `valued/data/ratio`                      | `<ratio>`                         |
-| `valued/data/relative-size`              | `<relative-size>`                 |
+### Building blocks
+
+| Import                    | Spec                              |
+| ------------------------- | --------------------------------- |
+| `valued/data/keyword`     | `keyword(...)`, `keywords([...])` |
+| `valued/data/number`      | `<number>`                        |
+| `valued/data/integer`     | `<integer>`                       |
+| `valued/data/percentage`  | `<percentage>`                    |
+| `valued/data/alpha-value` | `<alpha-value>`                   |
+| `valued/data/ratio`       | `<ratio>`                         |
+| `valued/data/flex`        | `<flex>`                          |
+
+### Dimensions
+
+| Import                             | Spec                     |
+| ---------------------------------- | ------------------------ |
+| `valued/data/dimension`            | `<dimension>`            |
+| `valued/data/length`               | `<length>`               |
+| `valued/data/length-percentage`    | `<length-percentage>`    |
+| `valued/data/angle`                | `<angle>`                |
+| `valued/data/angle-percentage`     | `<angle-percentage>`     |
+| `valued/data/frequency`            | `<frequency>`            |
+| `valued/data/frequency-percentage` | `<frequency-percentage>` |
+
+### Color
+
+| Import                                   | Spec                           |
+| ---------------------------------------- | ------------------------------ |
+| `valued/data/color`                      | `<color>`                      |
+| `valued/data/hue`                        | `<hue>`                        |
+| `valued/data/hue-interpolation-method`   | `<hue-interpolation-method>`   |
+| `valued/data/color-interpolation-method` | `<color-interpolation-method>` |
+
+### Keyword sets
+
+Prebuilt `keywords([...])` for specific properties. Reach for one, or roll your own with `keywords([...])` from `valued/data/keyword`.
+
+| Import                   | Spec           |
+| ------------------------ | -------------- |
+| `valued/data/line-style` | `<line-style>` |
+| `valued/data/display`    | `<display>`    |
+
+### Composite grammars
+
+| Import                 | Spec         |
+| ---------------------- | ------------ |
+| `valued/data/position` | `<position>` |
 
 Numeric data types accept `min` / `max` (or `minValue` / `maxValue` for dimensions) to constrain the accepted range. `length` and `lengthPercentage` expose a `.subset([...])` helper for restricting the accepted units.
 
