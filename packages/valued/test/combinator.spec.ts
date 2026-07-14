@@ -4,7 +4,7 @@ import { juxtapose } from '../src/combinators/juxtapose.ts'
 import { oneOf } from '../src/combinators/oneOf.ts'
 import { someOf } from '../src/combinators/someOf.ts'
 import { dimension, dimensionValue } from '../src/data/dimension.ts'
-import { keyword, keywordValue } from '../src/data/keyword.ts'
+import { keyword, keywords, keywordValue } from '../src/data/keyword.ts'
 import { optional } from '../src/multipliers/optional.ts'
 import { parse } from '../src/parse.ts'
 import { invalid, valid } from '../src/parser.ts'
@@ -375,5 +375,82 @@ describe('combinations', () => {
     expect(parse('foo bar baz', parser)).toEqual(
       valid([keywordValue('foo'), keywordValue('bar'), keywordValue('baz')]),
     )
+  })
+})
+
+describe('operand reuse (no identity dedup)', () => {
+  test('allOf keeps a repeated instance as its own slot', () => {
+    const k = keywords(['a', 'b'])
+    expect(parse('a a', allOf([k, k]))).toEqual(
+      valid([keywordValue('a'), keywordValue('a')]),
+    )
+  })
+
+  test('someOf keeps a repeated instance as its own slot', () => {
+    const k = keywords(['a', 'b'])
+    expect(parse('a a', someOf([k, k]))).toEqual(
+      valid([keywordValue('a'), keywordValue('a')]),
+    )
+  })
+
+  test('juxtapose parses a shared instance independently per position', () => {
+    const k = keywords(['a', 'b'])
+    expect(parse('a b', juxtapose([k, k]))).toEqual(
+      valid([keywordValue('a'), keywordValue('b')]),
+    )
+  })
+
+  test('oneOf still matches with a repeated alternative', () => {
+    const k = keyword('a')
+    expect(parse('a', oneOf([k, k]))).toEqual(valid(keywordValue('a')))
+  })
+})
+
+describe('allOf.struct', () => {
+  const bg = allOf.struct({
+    attachment: keyword('fixed'),
+    size: dimension(['px']),
+  })
+
+  test('yields an object keyed by field, order-independent', () => {
+    const expected = valid({
+      attachment: keywordValue('fixed'),
+      size: dimensionValue(10, 'px'),
+    })
+    expect(parse('fixed 10px', bg)).toEqual(expected)
+    expect(parse('10px fixed', bg)).toEqual(expected)
+  })
+
+  test('fails when a field is missing', () => {
+    expect(parse('fixed', bg)).toEqual(invalid())
+  })
+
+  test('a shared parser instance keys both fields independently', () => {
+    const k = keywords(['a', 'b'])
+    expect(parse('a a', allOf.struct({ first: k, second: k }))).toEqual(
+      valid({ first: keywordValue('a'), second: keywordValue('a') }),
+    )
+  })
+})
+
+describe('someOf.struct', () => {
+  const border = someOf.struct({
+    style: keywords(['solid', 'dashed']),
+    width: dimension(['px']),
+  })
+
+  test('omitted fields are null', () => {
+    expect(parse('solid', border)).toEqual(
+      valid({ style: keywordValue('solid'), width: null }),
+    )
+  })
+
+  test('all fields present, in any order', () => {
+    const expected = valid({
+      style: keywordValue('solid'),
+      width: dimensionValue(1, 'px'),
+    })
+    expect(parse('solid 1px', border)).toEqual(expected)
+    expect(parse('1px solid', border)).toEqual(expected)
   })
 })

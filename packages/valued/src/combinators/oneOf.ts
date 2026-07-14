@@ -40,7 +40,10 @@ class OneOf<
       throw new TypeError('oneOf() parser must have at least one parser')
     }
 
-    this.parsers = Array.from(new Set(parsers))
+    // Keep every alternative as given — no dedup. Alternatives are tried in
+    // order and the first match wins, so a repeated instance is at worst a
+    // redundant later branch; behavior never depends on operand identity.
+    this.parsers = Array.from(parsers)
   }
 
   init(): OneOfState {

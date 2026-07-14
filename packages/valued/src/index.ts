@@ -9,13 +9,21 @@ export type { ParseResult, Parser, ParserInput, ParserValue } from './parser.ts'
 
 // Combinators — the CSS Value Definition Syntax operators.
 export { allOf } from './combinators/allOf.ts'
-export type { AllOfInput, AllOfValue } from './combinators/allOf.ts'
+export type {
+  AllOfInput,
+  AllOfStructValue,
+  AllOfValue,
+} from './combinators/allOf.ts'
 export { juxtapose } from './combinators/juxtapose.ts'
 export type { JuxtaposeInput, JuxtaposeValue } from './combinators/juxtapose.ts'
 export { oneOf } from './combinators/oneOf.ts'
 export type { OneOfInput, OneOfValue } from './combinators/oneOf.ts'
 export { someOf } from './combinators/someOf.ts'
-export type { SomeOfInput, SomeOfValue } from './combinators/someOf.ts'
+export type {
+  SomeOfInput,
+  SomeOfStructValue,
+  SomeOfValue,
+} from './combinators/someOf.ts'
 
 // Multipliers — optionality and repetition.
 export { optional } from './multipliers/optional.ts'

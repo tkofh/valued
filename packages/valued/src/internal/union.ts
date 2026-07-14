@@ -132,3 +132,15 @@ type LooseElementInputs<Parsers extends ReadonlyArray<AnyParser>> =
 export type LooseCombinatorInput<Parsers extends ReadonlyArray<AnyParser>> =
   | LooseElementInputs<Parsers>
   | (string & {})
+
+/**
+ * The accepted-input type for an order-independent `.struct` combinator: the
+ * union of each field parser's input for autocomplete, plus `string & {}` to
+ * accept a multi-field string in any order. A struct is keyed by an object, so
+ * there is no parser tuple to enumerate orderings from — the loose union is
+ * used directly, mirroring the fallback the array combinators use for wide
+ * inputs.
+ */
+export type StructInput<Shape extends Record<string, AnyParser>> = Loose<
+  ParserInput<Shape[keyof Shape]>
+>
