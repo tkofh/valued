@@ -7,6 +7,10 @@ import type {
 } from '../parser.ts'
 import { isRecordOrArray } from '../predicates.ts'
 import type { Token } from '../tokenizer.ts'
+import type {
+  ExactCombinatorFits,
+  LooseCombinatorInput,
+} from '../internal/union.ts'
 
 type Combinations<T extends ReadonlyArray<string>> = T extends [string]
   ? T[0]
@@ -50,9 +54,18 @@ type InternalAllOfInput<
 /**
  * The accepted-input type of an {@link allOf} parser: every ordering of the
  * parsers' inputs, space-separated.
+ *
+ * `Combinations` enumerates every ordering, so its size grows with the product
+ * of the parsers' input widths times their permutations. When every input is
+ * narrow enough that stays bounded, the exact orderings are used; when it
+ * would overflow (a wide dimension input, or too many parsers), the type falls
+ * back to {@link LooseCombinatorInput} — each parser's own input plus
+ * `string & {}` — so a single value still autocompletes.
  */
 export type AllOfInput<T extends ReadonlyArray<AnyParser>> =
-  InternalAllOfInput<T>
+  ExactCombinatorFits<T> extends true
+    ? InternalAllOfInput<T>
+    : LooseCombinatorInput<T>
 
 type InternalAllOfValue<
   Parsers extends ReadonlyArray<AnyParser>,

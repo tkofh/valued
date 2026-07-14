@@ -5,6 +5,7 @@ import type {
   ParserValue,
 } from '../parser.ts'
 import type { Token } from '../tokenizer.ts'
+import type { IsUnionAtMost, Loose, ProductBudget } from './union.ts'
 
 function isComma(token: Token): boolean {
   return token.type === 'literal' && token.value === ','
@@ -134,6 +135,12 @@ type NumberRange<Start extends Integer, End extends Integer> = [
   ],
 ][Start][End]
 
+// The generated input enumerates every accepted repetition, so its size grows
+// as (input width) ** maxCount. When the base input is narrow enough for the
+// count budget, the exact repetitions are enumerated; when it would overflow (a
+// ~50-unit dimension past a couple of repetitions), the type falls back to
+// `Loose` — the base input plus `string & {}` — so a single value still
+// autocompletes, matching `oneOrMore` / `zeroOrMore`.
 export type RangeInput<
   P extends AnyParser,
   C extends boolean,
@@ -141,7 +148,13 @@ export type RangeInput<
   Max extends number,
 > = Min extends Integer
   ? Max extends Integer
-    ? Repeat<ParserInput<P>, C extends true ? ', ' : ' ', NumberRange<Min, Max>>
+    ? IsUnionAtMost<ParserInput<P>, ProductBudget<Max>> extends true
+      ? Repeat<
+          ParserInput<P>,
+          C extends true ? ', ' : ' ',
+          NumberRange<Min, Max>
+        >
+      : Loose<ParserInput<P>>
     : string
   : string
 
